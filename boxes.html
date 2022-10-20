@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Bouncing balls with three.js</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.js"></script>
+		<script>
+			const W = 50;
+			const N = 200;
+
+			function rand() {
+				return Math.random()*2 - 1;
+			}
+			
+			function norm(v) {
+				return v.x * v.x + v.y * v.y + v.z * v.z;
+			}
+			
+			function Cube() {
+				const S = 0.5 + Math.random();
+				const geometry = new THREE.BoxGeometry(S, S, S);
+				const material = new THREE.MeshNormalMaterial( );
+				const mesh = new THREE.Mesh( geometry, material );
+				this.mesh = mesh;
+				this.mass = S * S * S;
+				//this.position = {x: 0, y:0, z:0};
+				//this.velocity = {x: 0, y:0, z:0};
+				//this.rotation = {x: 0, y:0, z:0};
+				//this.spin = {x: 0, y:0, z:0};
+				this.position = {x: W*rand(), y: W*rand(), z: W*rand()};
+				this.velocity = {x: rand(), y: rand(), z: rand()};
+				this.rotation = {x: rand(), y: rand(), z: rand()};
+				this.spin = {x: 0.1*rand(), y: 0.1*rand(), z: 0.1*rand()};
+			}
+
+			function Sphere() {
+				const R = 0.5 + Math.random();
+				const geometry = new THREE.SphereGeometry(R);
+				const material = new THREE.MeshNormalMaterial( );
+				const mesh = new THREE.Mesh( geometry, material );
+				this.mesh = mesh;
+				this.mass = (4 / 3) * R * R * R * Math.PI;
+				//this.position = {x: 0, y:0, z:0};
+				//this.velocity = {x: 0, y:0, z:0};
+				//this.rotation = {x: 0, y:0, z:0};
+				//this.spin = {x: 0, y:0, z:0};
+				this.position = {x: W*rand(), y: W*rand(), z: W*rand()};
+				this.velocity = {x: rand(), y: rand(), z: rand()};
+				this.rotation = {x: rand(), y: rand(), z: rand()};
+				this.spin = {x: 0.1*rand(), y: 0.1*rand(), z: 0.1*rand()};
+			}
+
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+			const renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+			
+			var entities = [];
+
+			for (let i=0; i<N; i++) {
+				entities[i] = new Sphere();
+			}
+			
+			for (let e of entities) {
+				scene.add( e.mesh );
+				draw(e);
+			}
+
+			camera.position.z = 100;
+			
+			function bounce(p, v) {
+				let nx = p.x + v.x;
+				let ny = p.y + v.y;
+				let nz = p.z + v.z;
+				
+				if (nx >= W)
+				{ nx = 2 * W - nx; v.x = -v.x; }
+				if (ny >= W)
+				{ ny = 2 * W - ny; v.y = -v.y; }
+				if (nz >= W)
+				{ nz = 2 * W - nz; v.z = -v.z; }
+				if (nx <= -W)
+				{ nx = -2 * W - nx; v.x = -v.x; }
+				if (ny <= -W)
+				{ ny = -2 * W - ny; v.y = -v.y; }
+				if (nz <= -W)
+				{ nz = -2 * W - nz; v.z = -v.z; }
+				
+				p.x = nx;
+				p.y = ny;
+				p.z = nz;
+			}
+			
+			function update_entity(e) {
+				e.position.x += e.velocity.x;
+				e.position.y += e.velocity.y;
+				e.position.z += e.velocity.z;
+
+				bounce(e.mesh.position, e.velocity);
+
+				e.rotation.x += e.spin.x;
+				e.rotation.y += e.spin.y;
+				e.rotation.z += e.spin.z;
+			}
+			
+			function draw(e) {
+				e.mesh.position.x = e.position.x;
+				e.mesh.position.y = e.position.y;
+				e.mesh.position.z = e.position.z;
+				e.mesh.rotation.x = e.rotation.x;
+				e.mesh.rotation.y = e.rotation.y;
+				e.mesh.rotation.z = e.rotation.z;
+			}
+			
+			function compute_p() {
+				let P = 0;
+				for (let e of entities) {
+					P += e.mass * norm(e.velocity);
+				}
+				//console.log("P =", P);
+			}
+			
+			function animate() {
+				requestAnimationFrame( animate );
+
+				entities.forEach(update_entity);
+				entities.forEach(draw);
+				compute_p();
+				
+				renderer.render( scene, camera );
+			}
+			animate();
+		</script>
+	</body>
+</html>
