@@ -350,28 +350,15 @@ function move( location, destination, speed = playerSpeed ) {
     var posZ = location.position.z;
     var newPosX = destination.x;
     var newPosZ = destination.z;
- 
-    // Set a multiplier just in case we need negative values.
-    var multiplierX = 1;
-    var multiplierZ = 1;
- 
+  
     // Detect the distance between the current pos and target.
-    var diffX = Math.abs( posX - newPosX );
-    var diffZ = Math.abs( posZ - newPosZ );
+    var diffX = newPosX - posX;
+    var diffZ = newPosZ - posZ;
     var distance = Math.sqrt( diffX * diffX + diffZ * diffZ );
- 
-    // Use negative multipliers if necessary.
-    if (posX > newPosX) {
-      multiplierX = -1;
-    }
- 
-    if (posZ > newPosZ) {
-      multiplierZ = -1;
-    }
- 
+  
     // Update the main position.
-    location.position.x = location.position.x + ( moveDistance * ( diffX / distance )) * multiplierX;
-    location.position.z = location.position.z + ( moveDistance * ( diffZ / distance )) * multiplierZ;
+    location.position.x += moveDistance * diffX / distance;
+    location.position.z += moveDistance * diffZ / distance;
  
     stepsSound.play();
 
@@ -505,10 +492,10 @@ function detectCollisions() {
         // Move the object in the clear. Detect the best direction to move.
         if ( bounds.xMin <= collisions[ index ].xMax && bounds.xMax >= collisions[ index ].xMin ) {
           // Determine center then push out accordingly.
-          var objectCenterX = ((collisions[ index ].xMax - collisions[ index ].xMin) / 2) + collisions[ index ].xMin;
-          var playerCenterX = ((bounds.xMax - bounds.xMin) / 2) + bounds.xMin;
-          var objectCenterZ = ((collisions[ index ].zMax - collisions[ index ].zMin) / 2) + collisions[ index ].zMin;
-          var playerCenterZ = ((bounds.zMax - bounds.zMin) / 2) + bounds.zMin;
+          var objectCenterX = (collisions[ index ].xMax + collisions[ index ].xMin) / 2;
+          var playerCenterX = (bounds.xMax + bounds.xMin) / 2;
+          var objectCenterZ = (collisions[ index ].zMax + collisions[ index ].zMin) / 2;
+          var playerCenterZ = (bounds.zMax + bounds.zMin) / 2;
  
           // Determine the X axis push.
           if (objectCenterX > playerCenterX) {
@@ -520,7 +507,7 @@ function detectCollisions() {
         if ( bounds.zMin <= collisions[ index ].zMax && bounds.zMax >= collisions[ index ].zMin ) {
           // Determine the Z axis push.
           if (objectCenterZ > playerCenterZ) {
-          rotationPoint.position.z -= 1;
+            rotationPoint.position.z -= 1;
           } else {
             rotationPoint.position.z += 1;
           }
