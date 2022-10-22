@@ -7,8 +7,8 @@ function main() {
   // 1. Create an instance of the World app
   const world = new World(container);
 
-  // 2. Render the scene
-  world.render();
+  // 2. Start animation loops
+  world.start();
 }
 
 // call main to start the app
