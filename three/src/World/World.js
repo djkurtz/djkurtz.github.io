@@ -23,8 +23,8 @@ class World {
     loop = new Loop(camera, scene, renderer);
     container.append(renderer.domElement);
     
-    const cube = createCube(2, 2, 2, 'chartreuse', 2, 0, 0);
-    const cube2 = createCube(1, 1, 1, 'pink', 0, 0, 1.5, 0, 0, 30);
+    const cube = createCube(2, 2, 2, 'orchid', 2, 0, 0);
+    const cube2 = createCube(1, 1, 1, 'blue', 0, 0, 1.5, 0, 0, 30);
     cube.add(cube2);
     const light = createLights();
 
