@@ -19,11 +19,12 @@ class World {
     renderer = createRenderer();
     container.append(renderer.domElement);
     
-    const cube = createCube();
-    scene.add(cube);
-    const cube2 = createCube();
+    const cube = createCube(2, 2, 2, 'orchid', 2, 0, 0);
+    const cube2 = createCube(1, 1, 1, 'blue', 0, 0, 1.5, 0, 0, 30);
     cube.add(cube2);
-    cube2.position.set(2,2,2);
+    const light = createLights();
+
+    scene.add(cube, light);
 
     const resizer = new Resizer(container, camera, renderer);
     resizer.onResize = () => {
