@@ -14,10 +14,10 @@ function createMaterial(color) {
 
   // load a texture
   const texture_col = textureLoader.load(
-    '../../../assets/textures/uv-test-col.png'
+    '/three/assets/textures/uv-test-col.png'
   );
   const texture_bw = textureLoader.load(
-    '../../../assets/textures/uv-test-bw.png',
+    '/three/assets/textures/uv-test-bw.png',
   );
 
   // create a "standard" material
