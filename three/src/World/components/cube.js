@@ -23,10 +23,10 @@ function createMaterial(color) {
   // create a "standard" material
   // the texture we just loaded as a color map
   const material = new MeshStandardMaterial({
-    alphaMap: texture_col,
+    //alphaMap: texture_col,
     map: texture_bw,
-    transparent: true,
-    color: color
+    //transparent: true,
+    //color: color
   });
 
   return material;
