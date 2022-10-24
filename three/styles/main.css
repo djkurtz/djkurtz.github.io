@@ -33,3 +33,10 @@ h1 {
   */
   background-color: skyblue;
 }
+
+#switch-focus {
+  position: relative;
+  
+  /* make sure button is drawn on top */
+  z-index: 1;
+}

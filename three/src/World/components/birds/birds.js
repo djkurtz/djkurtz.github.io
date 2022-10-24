@@ -21,9 +21,9 @@ async function loadBirds() {
   const left = new Vector3( 7.5, 0, -10 );
   const back = new Vector3( 0, -2.5, -10 );
 
-  parrot.position.copy(left);
-  flamingo.position.copy(back);
-  stork.position.copy(front);
+  parrot.position.copy(front);
+  flamingo.position.copy(left);
+  stork.position.copy(back);
   
   return { parrot, flamingo, stork, }
 }
