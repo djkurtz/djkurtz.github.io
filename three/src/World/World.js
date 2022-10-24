@@ -52,6 +52,7 @@ class World {
     const { parrot, flamingo, stork } = await loadBirds();
 
     scene.add(parrot, flamingo, stork);
+    loop.updatables.push(parrot, flamingo, stork);
 
     // move the target to the center of the front bird
     focus_points.push(controls.target.clone(), stork.position, parrot.position, flamingo.position);
