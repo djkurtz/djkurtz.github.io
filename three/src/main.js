@@ -1,15 +1,24 @@
 import { World } from './World/World.js';
 
-function main() {
+async function main() {
   // Get a reference to the container element
   const container = document.querySelector('#scene-container');
-
-  // 1. Create an instance of the World app
+  
+  // Create a new world
   const world = new World(container);
+  
+  // Complete async tasks
+  await world.init();
 
-  // 2. Start animation loops
   world.start();
+
+  const switch_focus = document.getElementById("switch-focus");
+  switch_focus.addEventListener("click", function() {
+    world.focusNext();
+  });
 }
 
 // call main to start the app
-main();
+main().catch((err) => {
+  console.error(err);
+});
