@@ -6,9 +6,9 @@ async function loadBirds() {
   const loader = new GLTFLoader();
 
   const [parrotData, flamingoData, storkData] = await Promise.all([
-    loader.loadAsync('../../../assets/models/Parrot.glb'),
-    loader.loadAsync('../../../assets/models/Flamingo.glb'),
-    loader.loadAsync('../../../assets/models/Stork.glb'),
+    loader.loadAsync('/three/assets/models/Parrot.glb'),
+    loader.loadAsync('/three/assets/models/Flamingo.glb'),
+    loader.loadAsync('/three/assets/models/Stork.glb'),
   ]);
 
   console.log('Squaaawk!', parrotData);
