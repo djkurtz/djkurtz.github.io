@@ -19,6 +19,9 @@ let scene;
 let loop;
 let controls;
 
+let focus_points = [];
+let focus_select = 0;
+
 class World {
   constructor(container) {
     camera = createCamera();
@@ -44,13 +47,14 @@ class World {
 
   }
 
+  
   async init() {
     const { parrot, flamingo, stork } = await loadBirds();
 
-    // move the target to the center of the front bird
-    controls.target.copy(stork.position);
-
     scene.add(parrot, flamingo, stork);
+
+    // move the target to the center of the front bird
+    focus_points.push(controls.target.clone(), stork.position, parrot.position, flamingo.position);
   }
 
   render() {
@@ -63,6 +67,11 @@ class World {
 
   stop() {
     loop.stop();
+  }
+  
+  focusNext() {
+    focus_select = (focus_select + 1) % focus_points.length;
+    controls.target.copy(focus_points[focus_select].clone());
   }
 }
 
