@@ -3,7 +3,7 @@ import { PerspectiveCamera } from '../../../vendor/three/build/three.module.js';
 function createCamera() {
   const camera = new PerspectiveCamera(35, 1, 0.1, 100);
 
-  camera.position.set(-5, 5, 7);
+  camera.position.set(-1.5, 1.5, 6.5);
 
   return camera;
 }
