@@ -3,9 +3,25 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <style>
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0; padding: 0;
+  overflow: hidden;
+}
 canvas {
   border:1px solid #d3d3d3;
   background-color: #f1f1f1;
+  display: block;
+  margin: 0; padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
 }
 </style>
 </head>
@@ -18,15 +34,15 @@ var myScore;
 
 function startGame() {
   myGamePiece = new component(30, 30, "red", 10, 120);
-  myScore = new component("30px", "Consolas", "black", 280, 40, "text");
+  myScore = new textBox("30px", "Consolas", "black", 280, 40);
   myGameArea.start();
 }
 
 var myGameArea = {
   canvas : document.createElement("canvas"),
   start : function() {
-    this.canvas.width = 480;
-    this.canvas.height = 270;
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
     this.frameNo = 0;
@@ -48,6 +64,19 @@ var myGameArea = {
   }
 }
 
+function textBox(width, height, color, x, y) {
+  this.width = width;
+  this.height = height;
+  this.x = x;
+  this.y = y;    
+  this.update = function() {
+    ctx = myGameArea.context;
+    ctx.font = this.width + " " + this.height;
+    ctx.fillStyle = color;
+    ctx.fillText(this.text, this.x, this.y);
+  }
+}
+
 function component(width, height, color, x, y, type) {
   this.type = type;
   this.width = width;
@@ -58,18 +87,12 @@ function component(width, height, color, x, y, type) {
   this.y = y;    
   this.update = function() {
       ctx = myGameArea.context;
-      if (this.type == "text") {
-          ctx.font = this.width + " " + this.height;
-          ctx.fillStyle = color;
-          ctx.fillText(this.text, this.x, this.y);
-      } else {
-          ctx.fillStyle = color;
-          ctx.fillRect(this.x, this.y, this.width, this.height);
-      }
+      ctx.fillStyle = color;
+      ctx.fillRect(this.x, this.y, this.width, this.height);
   }
   this.newPos = function() {
       this.x += this.speedX;
-      this.y += this.speedY;        
+      this.y += this.speedY;
   }
   this.crashWith = function(otherobj) {
       var myleft = this.x;
@@ -117,15 +140,15 @@ function updateGameArea() {
   myScore.text="SCORE: " + myGameArea.frameNo;
   myScore.update();
 
-myGamePiece.moveAngle = 0;
-myGamePiece.speedX = 0;
-myGamePiece.speedY = 0;
-if (myGameArea.keys[37] && !myGameArea.keys[39]) { myGamePiece.speedX = -1; }
-if (!myGameArea.keys[37] && myGameArea.keys[39]) { myGamePiece.speedX = 1; }
-if (myGameArea.keys[38] && !myGameArea.keys[40]) { myGamePiece.speedY = -1; }
-if (!myGameArea.keys[38] && myGameArea.keys[40]) { myGamePiece.speedY = 1; }
-myGamePiece.newPos();
-myGamePiece.update();
+  myGamePiece.moveAngle = 0;
+  myGamePiece.speedX = 0;
+  myGamePiece.speedY = 0;
+  if (myGameArea.keys[37] && !myGameArea.keys[39]) { myGamePiece.speedX = -1; }
+  if (!myGameArea.keys[37] && myGameArea.keys[39]) { myGamePiece.speedX = 1; }
+  if (myGameArea.keys[38] && !myGameArea.keys[40]) { myGamePiece.speedY = -1; }
+  if (!myGameArea.keys[38] && myGameArea.keys[40]) { myGamePiece.speedY = 1; }
+  myGamePiece.newPos();
+  myGamePiece.update();
 }
 
 function everyinterval(n) {
