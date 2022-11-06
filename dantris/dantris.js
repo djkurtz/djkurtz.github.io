@@ -103,7 +103,7 @@ function drawLines(lines) {
   ctx.font = "18px Arial";
   ctx.fillStyle = "#0095DD";
   ctx.clearRect(0, 20, borderOffsetLeft - 1, 30);
-  ctx.fillText(`Lines: ${lines + 1}`, 8, 50);
+  ctx.fillText(`Lines: ${lines}`, 8, 50);
   ctx.restore();
 }
 
@@ -125,20 +125,46 @@ function setupBoard() {
 }
 
 const pieceTypes = [
-  { color: 'red', /* bar */
-    bricks: [ [-1, 0], [0, 0], [1, 0], [2, 0] ] },
+  { color: 'red', /* | */
+    rotations: [
+      [ [-1, 0], [0, 0], [1, 0], [2, 0] ],
+      [ [0, 1], [0, 0], [0, -1], [0, -2] ],
+    ] },
   { color: 'orange', /* T */
-    bricks: [ [-1, 0], [0, 0], [0, -1], [1, 0] ] },
+    rotations: [
+      [ [-1, 0], [0, 0], [0, -1], [1, 0] ],
+      [ [0, 1], [0, 0], [-1, 0], [0, -1] ],
+      [ [1, 0], [0, 0], [0, 1], [-1, 0] ],
+      [ [0, -1], [0, 0], [1, 0], [0, 1] ],
+    ] },
   { color: 'yellow', /* S */
-    bricks: [ [-1, 0], [0, 0], [0, -1], [1, -1] ] },
+    rotations: [
+      [ [-1, 0], [0, 0], [0, -1], [1, -1] ],
+      [ [0, 1], [0, 0], [-1, 0], [-1, -1] ],
+    ] },
   { color: 'green', /* Z */
-    bricks: [ [-1, -1], [0, -1], [0, 0], [1, 0] ] },
-  { color: 'blue',  /* box */
-    bricks: [ [0, -1], [1, -1], [0, 0], [1, 0] ] },
+    rotations: [
+      [ [1, 0], [0, 0], [0, -1], [-1, -1] ],
+      [ [0, -1], [0, 0], [-1, 0], [-1, 1] ],
+    ] },
+  { color: 'blue',  /* ☐ */
+    rotations: [
+      [ [-1, 0], [0, 0], [-1, -1], [0, -1] ],
+    ] },
   { color: 'indigo', /* L  */
-    bricks: [ [-1, -1], [-1, 0], [0, 0], [1, 0] ] },
-  { color: 'violet', /* 7 */
-    bricks: [ [-1, 0], [0, 0], [1, 0], [1, -1] ] },
+    rotations: [
+      [ [-1, 0], [0, 0], [1, 0], [1, -1] ],
+      [ [0, 1], [0, 0], [0, -1], [-1, -1] ],
+      [ [1, 0], [0, 0], [-1, 0], [-1, 1] ],
+      [ [0, -1], [0, 0], [0, 1], [1, 1] ],
+    ] },
+  { color: 'violet', /* Γ */
+    rotations: [
+      [ [1, 0], [0, 0], [-1, 0], [-1, -1] ],
+      [ [0, -1], [0, 0], [0, 1], [-1, 1] ],
+      [ [-1, 0], [0, 0], [1, 0], [1, 1] ],
+      [ [0, 1], [0, 0], [0, -1], [1, -1] ],
+    ] },
 ];
 
 function randomPieceType() {
@@ -149,30 +175,48 @@ function Piece() {
   this.x = startColumn;
   this.y = 0;
   this.type = randomPieceType();
+  this.rotation = 0;
 
   //this.image = new Image(brickWidth, brickHeight);
   //this.image.src = "blue_orange.png";
   
   this.draw = function () {
-    for (let b=0; b < this.type.bricks.length; b++) {
-      const bt = this.type.bricks[b];
-      drawBrick(this.x + bt[0], this.y + bt[1], this.type.color);
+    const shape = this.type.rotations[this.rotation];
+    for (let b = 0; b < shape.length; b++) {
+      const brick = shape[b];
+      drawBrick(this.x + brick[0], this.y + brick[1], this.type.color);
      //drawBrick(this.x, this.y, this.image);
     }
   }
 
   this.clear = function () {
-    for (let b=0; b < this.type.bricks.length; b++) {
-      const bt = this.type.bricks[b];
-      eraseBrick(this.x + bt[0], this.y + bt[1]);
+    const shape = this.type.rotations[this.rotation];
+    for (let b=0; b < shape.length; b++) {
+      const brick = shape[b];
+      eraseBrick(this.x + brick[0], this.y + brick[1]);
     }
   }
 
   this.canMove = function(dx, dy) {
-    for (let b = 0; b < this.type.bricks.length; b++) {
-      const brick = this.type.bricks[b]
+    const shape = this.type.rotations[this.rotation];
+    for (let b = 0; b < shape.length; b++) {
+      const brick = shape[b]
       const nx = this.x + brick[0] + dx;
       const ny = this.y + brick[1] + dy;
+      if (ny < 0)
+        continue;
+      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || bricks[nx][ny].status)
+        return false;
+    }
+    return true;
+  }
+
+  this.canRotate = function() {
+    const shape = this.type.rotations[(this.rotation + 1) % this.type.rotations.length];
+    for (let b = 0; b < shape.length; b++) {
+      const brick = shape[b];
+      const nx = this.x + brick[0];
+      const ny = this.y + brick[1];
       if (ny < 0)
         continue;
       if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || bricks[nx][ny].status)
@@ -211,20 +255,84 @@ function Piece() {
     return true;
   };
 
+  this.rotate = function () {
+    if (!this.canRotate())
+      return false;
+  
+    this.clear();
+    this.rotation = (this.rotation + 1) % this.type.rotations.length;
+    this.draw();
+    return true;
+  };
+
   this.drop = function () {
     while (this.moveDown())
       continue;
   }
 
   this.affix = function () {
-    for (let b = 0; b < this.type.bricks.length; b++) {
-      const brick = this.type.bricks[b]
+    const shape = this.type.rotations[this.rotation];
+    for (let b = 0; b < shape.length; b++) {
+      const brick = shape[b]
       const nx = this.x + brick[0];
       const ny = this.y + brick[1];
       bricks[nx][ny].status = true;
       bricks[nx][ny].color = this.type.color;
     }
-  };
+  }
+
+  this.checkLine = function () {
+    var completedLines = 0;
+    var linesToCheck = new Set();
+    const shape = this.type.rotations[this.rotation];
+    for (let b = 0; b < shape.length; b++) {
+      const brick = shape[b]
+      linesToCheck.add(this.y + brick[1]);
+    }
+
+    if (linesToCheck.length == 0) {
+      return;
+    }
+
+    linesToCheck = Array.from(linesToCheck).sort((a, b) => a - b);
+
+    for (let l = 0; l < linesToCheck.length; l++) {
+      const y = linesToCheck[l];
+      let count = 0;
+      for (let x = 0; x < brickColumnCount; x++) {
+        if (bricks[x][y].status) {
+          count += 1;
+        }
+      }
+
+      if (count !== brickColumnCount) {
+        continue;
+      }
+      
+      completedLines += 1;
+      dropLines(y);
+    }
+  
+    switch (completedLines) {
+      case 0:
+        return;
+      case 1:
+        increaseScore(100);
+        break;
+      case 2:
+        increaseScore(250);
+        break;
+      case 3:
+        increaseScore(500);
+        break;
+      case 3:
+        increaseScore(1000);
+        break;
+      }
+
+    lines += completedLines;
+    drawLines(lines);    
+  }  
 }
 
 function dropLines(fromY) {
@@ -242,31 +350,6 @@ function dropLines(fromY) {
   }
 }
 
-function checkLine(checkY) {
-  let count = 0;
-  for (let x = 0; x < brickColumnCount; x++) {
-    if (bricks[x][checkY].status) {
-      count += 1;
-    }
-  }
-
-  if (count !== brickColumnCount) {
-    return;
-  }
-  
-  increaseScore(100);
-  lines += 1;
-
-  if (level < levels.length) {
-    if (lines > levels[level].maxRows) {
-      level += 1;
-      drawLevel(level);
-    }
-  }
-
-  dropLines(checkY);
-}
-
 function draw() {
   tick += 1;
   if (tick % levels[level].speed == 0) {
@@ -274,9 +357,9 @@ function draw() {
       increaseScore(10);
       piece.affix();
 
-      checkLine(piece.y);
+      piece.checkLine();
 
-      piece = nextPiece
+      piece = nextPiece;
       piece.draw();
       nextPiece = new Piece();
     }
@@ -292,6 +375,7 @@ function draw() {
     piece.moveDown();
     downPressed = false;
   } else if (upPressed) {
+    piece.rotate(); 
     upPressed = false;
   } else if (spacePressed) {
     piece.drop();
