@@ -6,7 +6,7 @@ let upPressed = false;
 let downPressed = false;
 let spacePressed = false;
 let score = 0;
-let rowsCleared = 0;
+let lines = 0;
 let level = 0;
 let levelSpeed;
 var piece = null;
@@ -54,18 +54,23 @@ const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
   for (let r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { status: 0 };
+    bricks[c][r] = { status: false, color: null };
   }
 }
 
 function drawBrick(x, y, color) {
+  if (y < 0)
+    return;
   let dx = borderOffsetLeft + 2 * brickPadding + x * (brickWidth + 2 * brickPadding);
   let dy = borderOffsetTop + 2 * brickPadding + y * (brickWidth + 2 * brickPadding);
   ctx.fillStyle = color;
   ctx.fillRect(dx, dy, brickWidth, brickHeight);
+  //ctx.drawImage(color, dx, dy);
 }
 
 function eraseBrick(x, y) {
+  if (y < 0)
+    return;
   let dx = borderOffsetLeft + 2 * brickPadding + x * (brickWidth + 2 * brickPadding);
   let dy = borderOffsetTop + 2 * brickPadding + y * (brickWidth + 2 * brickPadding);
   ctx.clearRect(dx, dy, brickWidth, brickHeight);
@@ -93,12 +98,12 @@ function increaseScore(delta) {
   drawScore(score);
 }
 
-function drawLevel(level) {
+function drawLines(lines) {
   ctx.save();
   ctx.font = "18px Arial";
   ctx.fillStyle = "#0095DD";
   ctx.clearRect(0, 20, borderOffsetLeft - 1, 30);
-  ctx.fillText(`Level: ${level + 1}`, 8, 50);
+  ctx.fillText(`Lines: ${lines + 1}`, 8, 50);
   ctx.restore();
 }
 
@@ -116,47 +121,88 @@ function setupBoard() {
   drawNextBoxBorder();
   drawLogo();
   drawScore(0);
-  drawLevel(0);
+  drawLines(0);
 }
 
-function randomColor() {
-  const colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'indigo' , 'violet' ];
-  return colors[Math.floor(Math.random() * colors.length)];
+const pieceTypes = [
+  { color: 'red', /* bar */
+    bricks: [ [-1, 0], [0, 0], [1, 0], [2, 0] ] },
+  { color: 'orange', /* T */
+    bricks: [ [-1, 0], [0, 0], [0, -1], [1, 0] ] },
+  { color: 'yellow', /* S */
+    bricks: [ [-1, 0], [0, 0], [0, -1], [1, -1] ] },
+  { color: 'green', /* Z */
+    bricks: [ [-1, -1], [0, -1], [0, 0], [1, 0] ] },
+  { color: 'blue',  /* box */
+    bricks: [ [0, -1], [1, -1], [0, 0], [1, 0] ] },
+  { color: 'indigo', /* L  */
+    bricks: [ [-1, -1], [-1, 0], [0, 0], [1, 0] ] },
+  { color: 'violet', /* 7 */
+    bricks: [ [-1, 0], [0, 0], [1, 0], [1, -1] ] },
+];
+
+function randomPieceType() {
+  return pieceTypes[Math.floor(Math.random() * pieceTypes.length)];
 }
 
 function Piece() {
   this.x = startColumn;
   this.y = 0;
-  this.color = randomColor();
+  this.type = randomPieceType();
 
+  //this.image = new Image(brickWidth, brickHeight);
+  //this.image.src = "blue_orange.png";
+  
   this.draw = function () {
-    drawBrick(this.x, this.y, this.color);
+    for (let b=0; b < this.type.bricks.length; b++) {
+      const bt = this.type.bricks[b];
+      drawBrick(this.x + bt[0], this.y + bt[1], this.type.color);
+     //drawBrick(this.x, this.y, this.image);
+    }
   }
 
   this.clear = function () {
-    eraseBrick(this.x, this.y);
+    for (let b=0; b < this.type.bricks.length; b++) {
+      const bt = this.type.bricks[b];
+      eraseBrick(this.x + bt[0], this.y + bt[1]);
+    }
+  }
+
+  this.canMove = function(dx, dy) {
+    for (let b = 0; b < this.type.bricks.length; b++) {
+      const brick = this.type.bricks[b]
+      const nx = this.x + brick[0] + dx;
+      const ny = this.y + brick[1] + dy;
+      if (ny < 0)
+        continue;
+      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || bricks[nx][ny].status)
+        return false;
+    }
+    return true;
   }
 
   this.moveLeft = function () {
-    if (this.x === 0 || bricks[this.x - 1][this.y].status)
-      return;
-  
+    if (!this.canMove(-1, 0))
+      return false;
+
     this.clear();
     this.x -= 1;
     this.draw();
+    return true;
   };
   
   this.moveRight = function () {
-    if (this.x === brickColumnCount - 1 || bricks[this.x + 1][this.y].status)
-      return;
+    if (!this.canMove(+1, 0))
+      return false;
   
     this.clear();
     this.x += 1;
     this.draw();
+    return true;
   };
 
   this.moveDown = function () {
-    if (this.y === brickRowCount - 1 || bricks[this.x][this.y + 1].status)
+    if (!this.canMove(0, +1))
       return false;
   
     this.clear();
@@ -166,21 +212,18 @@ function Piece() {
   };
 
   this.drop = function () {
-    this.clear();
-
-    let z;
-    for (z = this.y; z < brickRowCount - 1; z++) {
-      if (bricks[this.x][z + 1].status) {
-        break;
-      }
-    }
-
-    this.y = z;
-    this.draw();
+    while (this.moveDown())
+      continue;
   }
 
   this.affix = function () {
-    bricks[this.x][this.y].status = 1;
+    for (let b = 0; b < this.type.bricks.length; b++) {
+      const brick = this.type.bricks[b]
+      const nx = this.x + brick[0];
+      const ny = this.y + brick[1];
+      bricks[nx][ny].status = true;
+      bricks[nx][ny].color = this.type.color;
+    }
   };
 }
 
@@ -189,13 +232,12 @@ function dropLines(fromY) {
     eraseBrick(x, fromY);
   }  
 
-  for (let y = fromY - 1; y >= 0; y--) {
+  for (let y = fromY; y > 0; y--) {
     for (let x = 0; x < brickColumnCount; x++) {
-      if (bricks[x][y].status) {
-        eraseBrick(x, y);
-        drawBrick(x, y + 1);
-      }
-      bricks[x][y + 1].status = bricks[x][y].status;
+      bricks[x][y] = bricks[x][y - 1];
+      eraseBrick(x, y);
+      if (bricks[x][y].status)
+        drawBrick(x, y, bricks[x][y].color);
     }
   }
 }
@@ -213,10 +255,10 @@ function checkLine(checkY) {
   }
   
   increaseScore(100);
-  rowsCleared += 1;
+  lines += 1;
 
   if (level < levels.length) {
-    if (rowsCleared > levels[level].maxRows) {
+    if (lines > levels[level].maxRows) {
       level += 1;
       drawLevel(level);
     }
@@ -224,8 +266,6 @@ function checkLine(checkY) {
 
   dropLines(checkY);
 }
-
-piece = new Piece();
 
 function draw() {
   tick += 1;
@@ -236,8 +276,9 @@ function draw() {
 
       checkLine(piece.y);
 
-      piece = new Piece();
+      piece = nextPiece
       piece.draw();
+      nextPiece = new Piece();
     }
   }
 
@@ -263,6 +304,9 @@ function draw() {
 document.addEventListener("keydown", keyDownHandler, false);
 
 setupBoard();
+var piece = new Piece();
+piece.draw();
+var nextPiece = new Piece();
 draw();
 
 function keyDownHandler(e) {
