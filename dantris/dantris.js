@@ -511,6 +511,8 @@ function processKeys() {
 }
 
 document.addEventListener("keydown", keyDownHandler, false);
+canvas.addEventListener("mousemove", mouseMoveHandler, false);
+document.addEventListener("mouseup", mouseUpHandler, false);
 
 setupBoard();
 let piece = new Piece();
@@ -536,4 +538,17 @@ function keyDownHandler(e) {
   } else if (e.key === "t") {
     tPressed = true;
   }
+}
+
+function mouseMoveHandler(e) {
+  if (e.movementX > 1) {
+    rightPressed = true;
+  } else if (e.movementX < -1) {
+    leftPressed = true;
+  }
+  //console.log(e.offsetX);
+}
+
+function mouseUpHandler(e) {
+  spacePressed = true;
 }
