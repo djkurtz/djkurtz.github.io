@@ -22,7 +22,11 @@ const levels = [
   { lines: 45, speed: 20 },
   { lines: 50, speed: 15 },
   { lines: 55, speed: 10 },
-  { lines: 60, speed: 5 },
+  { lines: 60, speed: 9 },
+  { lines: 70, speed: 8 },
+  { lines: 80, speed: 7 },
+  { lines: 100, speed: 6 },
+  { lines: 125, speed: 5 },
 ];
 
 const brickWidth = 20;
@@ -89,7 +93,7 @@ function drawNextBoxBorder() {
 
 function drawScore(score) {
   ctx.save();
-  ctx.font = "18px Arial";
+  ctx.font = "20px Arial";
   ctx.fillStyle = "#0095DD";
   ctx.clearRect(0, 0, borderOffsetLeft - 1, 30);
   ctx.fillText(`Score: ${score}`, 8, 20);
@@ -103,19 +107,20 @@ function increaseScore(delta) {
 
 function drawLines(lines) {
   ctx.save();
-  ctx.font = "18px Arial";
+  ctx.font = "20px Arial";
   ctx.fillStyle = "#0095DD";
-  ctx.clearRect(0, 20, borderOffsetLeft - 1, 30);
+  ctx.clearRect(0, 30, borderOffsetLeft - 1, 30);
   ctx.fillText(`Lines: ${lines}`, 8, 50);
   ctx.restore();
 }
 
 function drawLogo() {
   ctx.save();
-  ctx.font = "24px Courier";
+  ctx.font = "26px Courier";
   ctx.fillStyle = "#0095DD";
+  ctx.textBaseline = "middle";
   ctx.textAlign = "center";
-  ctx.fillText(`Dantris 2022`, canvas.width/2, 20);
+  ctx.fillText(`Dantris 2022`, canvas.width/2, borderOffsetTop/2);
   ctx.restore();
 }
 
@@ -129,6 +134,31 @@ function setupBoard() {
   drawLogo();
   drawScore(0);
   drawLines(0);
+}
+
+const gameOverWidth = borderWidth;
+const gameOverHeight = 60;
+const gameOverOffsetTop = Math.floor((canvas.height - gameOverHeight) / 2);
+const gameOverOffsetLeft = Math.floor((canvas.width - gameOverWidth) / 2);
+
+function gameOver() {
+  ctx.save();
+  ctx.globalAlpha = 0.2;
+  ctx.fillRect(borderOffsetLeft, borderOffsetTop, borderWidth, borderHeight);
+  ctx.restore();
+
+  ctx.clearRect(gameOverOffsetLeft, gameOverOffsetTop, gameOverWidth, gameOverHeight);
+  ctx.strokeRect(gameOverOffsetLeft, gameOverOffsetTop, gameOverWidth, gameOverHeight);
+
+  ctx.save();
+  ctx.font = "32px ComicSans";
+  ctx.fillStyle = "#0095DD";
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+  ctx.fillText(`Game Over!`, canvas.width/2, canvas.height/2);
+  ctx.restore();
+
+  tromboneSound.play();
 }
 
 const pieceTypes = [
@@ -188,19 +218,26 @@ function Piece() {
   //this.image.src = "blue_orange.png";
   
   this.draw = function () {
+    let collision = false;
     const shape = this.type.rotations[this.rotation];
     for (let b = 0; b < shape.length; b++) {
       const brick = shape[b];
-      drawBrick(this.x + brick[0], this.y + brick[1], this.type.color);
-     //drawBrick(this.x, this.y, this.image);
+      const nx = this.x + brick[0];
+      const ny = this.y + brick[1];
+      drawBrick(nx, ny, this.type.color);
+      // drawBrick(nx, ny, this.image);
     }
+    
+    return !collision;
   }
 
   this.clear = function () {
     const shape = this.type.rotations[this.rotation];
     for (let b=0; b < shape.length; b++) {
       const brick = shape[b];
-      eraseBrick(this.x + brick[0], this.y + brick[1]);
+      const nx = this.x + brick[0];
+      const ny = this.y + brick[1];
+      eraseBrick(nx, ny);
     }
   }
 
@@ -283,6 +320,9 @@ function Piece() {
       const brick = shape[b];
       const nx = this.x + brick[0];
       const ny = this.y + brick[1];
+      if (ny < 0) {
+        continue;
+      }
       bricks[ny][nx].status = true;
       bricks[ny][nx].color = this.type.color;
     }
@@ -294,8 +334,12 @@ function Piece() {
     var linesToCheck = new Set();
     const shape = this.type.rotations[this.rotation];
     for (let b = 0; b < shape.length; b++) {
-      const brick = shape[b]
-      linesToCheck.add(this.y + brick[1]);
+      const brick = shape[b];
+      let y = this.y + brick[1];
+      // Ignore off-screen lines for blocks at very top.
+      if (y >= 0) {
+        linesToCheck.add(this.y + brick[1]);
+      }
     }
 
     if (linesToCheck.length == 0) {
@@ -378,6 +422,11 @@ function draw() {
 
       piece = nextPiece;
       piece.draw();
+      if (!piece.canMove(0, 0)) {
+        gameOver();
+        return;
+      }
+
       nextPiece = new Piece();
     }
   }
