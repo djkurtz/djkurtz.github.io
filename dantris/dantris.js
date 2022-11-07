@@ -5,10 +5,11 @@ let leftPressed = false;
 let upPressed = false;
 let downPressed = false;
 let spacePressed = false;
+let kPressed = false;
+let tPressed = false;
 let score = 0;
 let lines = 0;
-var piece = null;
-var tick = 0;
+let tick = 0;
 
 const levels = [
   { lines: 5, speed: 60 },
@@ -57,31 +58,78 @@ function Brick() {
   this.color = null;
 }
 
-const bricks = new Array(brickRowCount);
-for (let y = 0; y < bricks.length; y++) {
-  bricks[y] = new Array(brickColumnCount);
-  for (let x = 0; x < bricks[y].length; x++) {
-    bricks[y][x] = { status: false, color: null };
+function Board(left, top) {
+  this.left = left;
+  this.top = top;
+
+  this.bricks = new Array(brickRowCount);
+  for (let y = 0; y < this.bricks.length; y++) {
+    this.bricks[y] = new Array(brickColumnCount);
+    for (let x = 0; x < this.bricks[y].length; x++) {
+      this.bricks[y][x] = new Brick();
+    }
+  }
+
+  this.status = function (x, y) {
+    return this.bricks[y][x].status;
+  }
+
+  this.affix = function (x, y, color) {
+    this.bricks[y][x].status = true;
+    this.bricks[y][x].color = color;
+  }
+
+  this.drawBrick = function (x, y, color) {
+    if (y < 0)
+      return;
+    let dx = this.left + 2 * brickPadding + x * (brickWidth + 2 * brickPadding);
+    let dy = this.top + 2 * brickPadding + y * (brickWidth + 2 * brickPadding);
+    ctx.fillStyle = color;
+    ctx.fillRect(dx, dy, brickWidth, brickHeight);
+    //ctx.drawImage(color, dx, dy);
+  }
+
+  this.eraseBrick = function (x, y) {
+    if (y < 0)
+      return;
+    let dx = this.left + 2 * brickPadding + x * (brickWidth + 2 * brickPadding);
+    let dy = this.top + 2 * brickPadding + y * (brickWidth + 2 * brickPadding);
+    ctx.clearRect(dx, dy, brickWidth, brickHeight);
+  }
+
+  this._dropLines = function(fromY) {
+    for (let y = fromY; y > 0; y--) {
+      for (let x = 0; x < brickColumnCount; x++) {
+        Object.assign(this.bricks[y][x], this.bricks[y - 1][x]);
+        this.eraseBrick(x, y);
+        if (this.bricks[y][x].status)
+          this.drawBrick(x, y, this.bricks[y][x].color);
+      }
+    }
+  }
+
+  this._isLineFull = function(y) {
+    const line = this.bricks[y];
+    for (let x = 0; x < line.length; x++)
+      if (!line[x].status)
+        return false;
+    return true;
+  }
+
+  this.checkLines = function(lines) {
+    let count = 0;
+    for (let l = 0; l < lines.length; l++) {
+      const y = lines[l];
+      if (this._isLineFull(y)) {
+        count += 1;
+        this._dropLines(y);
+      }      
+    }
+    return count;
   }
 }
 
-function drawBrick(x, y, color) {
-  if (y < 0)
-    return;
-  let dx = borderOffsetLeft + 2 * brickPadding + x * (brickWidth + 2 * brickPadding);
-  let dy = borderOffsetTop + 2 * brickPadding + y * (brickWidth + 2 * brickPadding);
-  ctx.fillStyle = color;
-  ctx.fillRect(dx, dy, brickWidth, brickHeight);
-  //ctx.drawImage(color, dx, dy);
-}
-
-function eraseBrick(x, y) {
-  if (y < 0)
-    return;
-  let dx = borderOffsetLeft + 2 * brickPadding + x * (brickWidth + 2 * brickPadding);
-  let dy = borderOffsetTop + 2 * brickPadding + y * (brickWidth + 2 * brickPadding);
-  ctx.clearRect(dx, dy, brickWidth, brickHeight);
-}
+let board = new Board(borderOffsetLeft, borderOffsetTop);
 
 function drawBorder() {
   ctx.strokeRect(borderOffsetLeft, borderOffsetTop, borderWidth, borderHeight);
@@ -161,7 +209,14 @@ function gameOver() {
   tromboneSound.play();
 }
 
-const pieceTypes = [
+const kTypes = [
+  { color: 'pink', /* . */
+    rotations: [
+      [ [0, 0], ],
+    ] },
+];
+
+const tradTypes = [
   { color: 'red', /* | */
     rotations: [
       [ [-1, 0], [0, 0], [1, 0], [2, 0] ],
@@ -204,6 +259,8 @@ const pieceTypes = [
     ] },
 ];
 
+let pieceTypes = tradTypes;
+
 function randomPieceType() {
   return pieceTypes[Math.floor(Math.random() * pieceTypes.length)];
 }
@@ -224,7 +281,7 @@ function Piece() {
       const brick = shape[b];
       const nx = this.x + brick[0];
       const ny = this.y + brick[1];
-      drawBrick(nx, ny, this.type.color);
+      board.drawBrick(nx, ny, this.type.color);
       // drawBrick(nx, ny, this.image);
     }
     
@@ -237,7 +294,7 @@ function Piece() {
       const brick = shape[b];
       const nx = this.x + brick[0];
       const ny = this.y + brick[1];
-      eraseBrick(nx, ny);
+      board.eraseBrick(nx, ny);
     }
   }
 
@@ -249,7 +306,7 @@ function Piece() {
       const ny = this.y + brick[1] + dy;
       if (ny < 0)
         continue;
-      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || bricks[ny][nx].status)
+      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || board.status(nx, ny))
         return false;
     }
     return true;
@@ -263,7 +320,7 @@ function Piece() {
       const ny = this.y + brick[1];
       if (ny < 0)
         continue;
-      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || bricks[ny][nx].status)
+      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || board.status(nx, ny))
         return false;
     }
     return true;
@@ -323,8 +380,7 @@ function Piece() {
       if (ny < 0) {
         continue;
       }
-      bricks[ny][nx].status = true;
-      bricks[ny][nx].color = this.type.color;
+      board.affix(nx, ny, this.type.color);
     }
     popSound.play();
   }
@@ -348,22 +404,7 @@ function Piece() {
 
     linesToCheck = Array.from(linesToCheck).sort((a, b) => a - b);
 
-    for (let l = 0; l < linesToCheck.length; l++) {
-      const y = linesToCheck[l];
-      let count = 0;
-      for (let x = 0; x < brickColumnCount; x++) {
-        if (bricks[y][x].status) {
-          count += 1;
-        }
-      }
-
-      if (count !== brickColumnCount) {
-        continue;
-      }
-      
-      completedLines += 1;
-      dropLines(y);
-    }
+    completedLines = board.checkLines(linesToCheck);
   
     switch (completedLines) {
       case 0:
@@ -377,7 +418,7 @@ function Piece() {
       case 3:
         increaseScore(500);
         break;
-      case 3:
+      case 4:
         increaseScore(1000);
         break;
       }
@@ -386,21 +427,6 @@ function Piece() {
     drawLines(lines);
     blurpSound.play();
   }  
-}
-
-function dropLines(fromY) {
-  for (let x = 0; x < brickColumnCount; x++) {
-    eraseBrick(x, fromY);
-  }
-
-  for (let y = fromY; y > 0; y--) {
-    for (let x = 0; x < brickColumnCount; x++) {
-      Object.assign(bricks[y][x], bricks[y - 1][x]);
-      eraseBrick(x, y);
-      if (bricks[y][x].status)
-        drawBrick(x, y, bricks[y][x].color);
-    }
-  }
 }
 
 function gameSpeed() {
@@ -417,7 +443,6 @@ function draw() {
     if (!piece.moveDown()) {
       increaseScore(10);
       piece.affix();
-
       piece.checkLine();
 
       piece = nextPiece;
@@ -431,6 +456,12 @@ function draw() {
     }
   }
 
+  processKeys();
+
+  requestAnimationFrame(draw);
+}
+
+function processKeys() {
   if (rightPressed) {
     piece.moveRight();
     rightPressed = false;
@@ -446,17 +477,21 @@ function draw() {
   } else if (spacePressed) {
     piece.drop();
     spacePressed = false;
+  } else if (kPressed) {
+    pieceTypes = kTypes;
+    kPressed = false;
+  } else if (tPressed) {
+    pieceTypes = tradTypes;
+    tPressed = false;
   }
-
-  requestAnimationFrame(draw);
 }
 
 document.addEventListener("keydown", keyDownHandler, false);
 
 setupBoard();
-var piece = new Piece();
+let piece = new Piece();
 piece.draw();
-var nextPiece = new Piece();
+let nextPiece = new Piece();
 draw();
 
 function keyDownHandler(e) {
@@ -470,5 +505,9 @@ function keyDownHandler(e) {
     downPressed = true;
   } else if (e.key === " ") {
     spacePressed = true;
+  } else if (e.key === "k") {
+    kPressed = true;
+  } else if (e.key === "t") {
+    tPressed = true;
   }
 }
