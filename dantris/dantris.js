@@ -7,24 +7,22 @@ let downPressed = false;
 let spacePressed = false;
 let score = 0;
 let lines = 0;
-let level = 0;
-let levelSpeed;
 var piece = null;
 var tick = 0;
 
 const levels = [
-  { maxRows: 5, speed: 60 },
-  { maxRows: 10, speed: 55 },
-  { maxRows: 15, speed: 50 },
-  { maxRows: 20, speed: 45 },
-  { maxRows: 25, speed: 40 },
-  { maxRows: 30, speed: 35 },
-  { maxRows: 35, speed: 30 },
-  { maxRows: 40, speed: 25 },
-  { maxRows: 45, speed: 20 },
-  { maxRows: 50, speed: 15 },
-  { maxRows: 55, speed: 10 },
-  { maxRows: 60, speed: 5 },
+  { lines: 5, speed: 60 },
+  { lines: 10, speed: 55 },
+  { lines: 15, speed: 50 },
+  { lines: 20, speed: 45 },
+  { lines: 25, speed: 40 },
+  { lines: 30, speed: 35 },
+  { lines: 35, speed: 30 },
+  { lines: 40, speed: 25 },
+  { lines: 45, speed: 20 },
+  { lines: 50, speed: 15 },
+  { lines: 55, speed: 10 },
+  { lines: 60, speed: 5 },
 ];
 
 const brickWidth = 20;
@@ -50,11 +48,16 @@ const nextPieceBoxTop = borderOffsetTop;
 const nextPieceBoxLeft = 
     (canvas.width + borderOffsetLeft + borderWidth - nextPieceBoxWidth) / 2;
 
-const bricks = [];
-for (let c = 0; c < brickColumnCount; c++) {
-  bricks[c] = [];
-  for (let r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { status: false, color: null };
+function Brick() {
+  this.status = false;
+  this.color = null;
+}
+
+const bricks = new Array(brickRowCount);
+for (let y = 0; y < bricks.length; y++) {
+  bricks[y] = new Array(brickColumnCount);
+  for (let x = 0; x < bricks[y].length; x++) {
+    bricks[y][x] = { status: false, color: null };
   }
 }
 
@@ -115,6 +118,10 @@ function drawLogo() {
   ctx.fillText(`Dantris 2022`, canvas.width/2, 20);
   ctx.restore();
 }
+
+var blurpSound = new Audio('blurp.wav');
+var tromboneSound = new Audio('trombone.wav');
+var popSound = new Audio('pop.wav');
 
 function setupBoard() {
   drawBorder();
@@ -205,7 +212,7 @@ function Piece() {
       const ny = this.y + brick[1] + dy;
       if (ny < 0)
         continue;
-      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || bricks[nx][ny].status)
+      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || bricks[ny][nx].status)
         return false;
     }
     return true;
@@ -219,7 +226,7 @@ function Piece() {
       const ny = this.y + brick[1];
       if (ny < 0)
         continue;
-      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || bricks[nx][ny].status)
+      if (nx < 0 || nx >= brickColumnCount || ny >= brickRowCount || bricks[ny][nx].status)
         return false;
     }
     return true;
@@ -273,12 +280,13 @@ function Piece() {
   this.affix = function () {
     const shape = this.type.rotations[this.rotation];
     for (let b = 0; b < shape.length; b++) {
-      const brick = shape[b]
+      const brick = shape[b];
       const nx = this.x + brick[0];
       const ny = this.y + brick[1];
-      bricks[nx][ny].status = true;
-      bricks[nx][ny].color = this.type.color;
+      bricks[ny][nx].status = true;
+      bricks[ny][nx].color = this.type.color;
     }
+    popSound.play();
   }
 
   this.checkLine = function () {
@@ -300,7 +308,7 @@ function Piece() {
       const y = linesToCheck[l];
       let count = 0;
       for (let x = 0; x < brickColumnCount; x++) {
-        if (bricks[x][y].status) {
+        if (bricks[y][x].status) {
           count += 1;
         }
       }
@@ -331,28 +339,37 @@ function Piece() {
       }
 
     lines += completedLines;
-    drawLines(lines);    
+    drawLines(lines);
+    blurpSound.play();
   }  
 }
 
 function dropLines(fromY) {
   for (let x = 0; x < brickColumnCount; x++) {
     eraseBrick(x, fromY);
-  }  
+  }
 
   for (let y = fromY; y > 0; y--) {
     for (let x = 0; x < brickColumnCount; x++) {
-      bricks[x][y] = bricks[x][y - 1];
+      Object.assign(bricks[y][x], bricks[y - 1][x]);
       eraseBrick(x, y);
-      if (bricks[x][y].status)
-        drawBrick(x, y, bricks[x][y].color);
+      if (bricks[y][x].status)
+        drawBrick(x, y, bricks[y][x].color);
     }
   }
 }
 
+function gameSpeed() {
+  for (let l = 0; l < levels.length; l++) {
+    if (lines < levels[l].lines)
+      return levels[l].speed;
+  }
+  return 1;
+}
+
 function draw() {
   tick += 1;
-  if (tick % levels[level].speed == 0) {
+  if (tick % gameSpeed() == 0) {
     if (!piece.moveDown()) {
       increaseScore(10);
       piece.affix();
