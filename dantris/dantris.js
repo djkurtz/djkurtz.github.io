@@ -47,24 +47,28 @@ const borderHeight = paddedBrickHeight * brickRowCount + borderThickness;
 const borderOffsetTop = 30;
 const borderOffsetLeft = Math.floor((canvas.width - borderWidth) / 2);
 
-const nextPieceBoxWidth = 5 * paddedBrickWidth;
-const nextPieceBoxHeight = 5 * paddedBrickHeight;
+const nextBrickRowCount = 4;
+const nextBrickColumnCount = 6;
+const nextPieceBoxWidth = nextBrickColumnCount * paddedBrickWidth + borderThickness;
+const nextPieceBoxHeight = nextBrickRowCount * paddedBrickHeight + borderThickness;
 const nextPieceBoxTop = borderOffsetTop;
 const nextPieceBoxLeft = 
-    (canvas.width + borderOffsetLeft + borderWidth - nextPieceBoxWidth) / 2;
+    Math.floor((canvas.width + borderOffsetLeft + borderWidth - nextPieceBoxWidth) / 2);
 
 function Brick() {
   this.status = false;
   this.color = null;
 }
 
-function Board(left, top) {
+function Board(left, top, width, height) {
   this.left = left;
   this.top = top;
+  this.width = width;
+  this.height = height;
 
-  this.bricks = new Array(brickRowCount);
+  this.bricks = new Array(this.height);
   for (let y = 0; y < this.bricks.length; y++) {
-    this.bricks[y] = new Array(brickColumnCount);
+    this.bricks[y] = new Array(this.width);
     for (let x = 0; x < this.bricks[y].length; x++) {
       this.bricks[y][x] = new Brick();
     }
@@ -77,6 +81,15 @@ function Board(left, top) {
   this.affix = function (x, y, color) {
     this.bricks[y][x].status = true;
     this.bricks[y][x].color = color;
+  }
+
+  this.eraseAllBricks = function () {
+    for (let y = 0; y < this.bricks.length; y++) {
+      let line = this.bricks[y];
+      for (let x = 0; x < line.length; x++) {
+        this.eraseBrick(x, y);
+      }
+    }
   }
 
   this.drawBrick = function (x, y, color) {
@@ -99,7 +112,7 @@ function Board(left, top) {
 
   this._dropLines = function(fromY) {
     for (let y = fromY; y > 0; y--) {
-      for (let x = 0; x < brickColumnCount; x++) {
+      for (let x = 0; x < this.width; x++) {
         Object.assign(this.bricks[y][x], this.bricks[y - 1][x]);
         this.eraseBrick(x, y);
         if (this.bricks[y][x].status)
@@ -129,7 +142,8 @@ function Board(left, top) {
   }
 }
 
-let board = new Board(borderOffsetLeft, borderOffsetTop);
+let board = new Board(borderOffsetLeft, borderOffsetTop, brickColumnCount, brickRowCount);
+let nextBoard = new Board(nextPieceBoxLeft, nextPieceBoxTop, nextBrickColumnCount, nextBrickRowCount);
 
 function drawBorder() {
   ctx.strokeRect(borderOffsetLeft, borderOffsetTop, borderWidth, borderHeight);
@@ -274,8 +288,19 @@ function Piece() {
   //this.image = new Image(brickWidth, brickHeight);
   //this.image.src = "blue_orange.png";
   
+  this.drawNext = function () {
+    nextBoard.eraseAllBricks();
+    const shape = this.type.rotations[0];
+    for (let b = 0; b < shape.length; b++) {
+      const brick = shape[b];
+      const nx = 2 + brick[0];
+      const ny = 2 + brick[1];
+      nextBoard.drawBrick(nx, ny, this.type.color);
+      // drawBrick(nx, ny, this.image);
+    }
+  }
+
   this.draw = function () {
-    let collision = false;
     const shape = this.type.rotations[this.rotation];
     for (let b = 0; b < shape.length; b++) {
       const brick = shape[b];
@@ -284,8 +309,6 @@ function Piece() {
       board.drawBrick(nx, ny, this.type.color);
       // drawBrick(nx, ny, this.image);
     }
-    
-    return !collision;
   }
 
   this.clear = function () {
@@ -453,6 +476,7 @@ function draw() {
       }
 
       nextPiece = new Piece();
+      nextPiece.drawNext();
     }
   }
 
@@ -492,7 +516,9 @@ setupBoard();
 let piece = new Piece();
 piece.draw();
 let nextPiece = new Piece();
+nextPiece.drawNext();
 draw();
+
 
 function keyDownHandler(e) {
   if (e.key === "ArrowRight") {
