@@ -513,6 +513,7 @@ function processKeys() {
 document.addEventListener("keydown", keyDownHandler, false);
 canvas.addEventListener("mousemove", mouseMoveHandler, false);
 document.addEventListener("mouseup", mouseUpHandler, false);
+document.addEventListener("touchmove", touchMoveHandler, false);
 
 setupBoard();
 let piece = new Piece();
@@ -551,4 +552,19 @@ function mouseMoveHandler(e) {
 
 function mouseUpHandler(e) {
   spacePressed = true;
+}
+
+let lastTouchX = null;
+function touchMoveHandler(e) {
+  if (!lastTouchX) {
+    lastTouchX = e.touches[0].clientX;
+    return;
+  }
+  let delta = e.touches[0].clientX - lastTouchX
+  lastTouchX = e.touches[0].clientX;
+  if (delta > 1) {
+    rightPressed = true;
+  } else if (delta < -1) {
+    leftPressed = true;
+  }
 }
