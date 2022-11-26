@@ -21,6 +21,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
 class Bullets extends Phaser.Physics.Arcade.Group
 {
   constructor (scene) {
+    // Bullets in the group start disabled
     super(scene.physics.world, scene, { enable: false });
 
     this.createMultiple({
@@ -44,6 +45,11 @@ class Bullets extends Phaser.Physics.Arcade.Group
   }
 }
 
+const State = Object.freeze({
+  alive: 0,
+  dead: 1,
+});
+
 class Main extends Phaser.Scene
 {
   constructor ()
@@ -57,7 +63,6 @@ class Main extends Phaser.Scene
     this.thrust;
     this.cursors;
     this.keySpace;
-    this.isDead = false;
   }
 
   preload () {
@@ -91,6 +96,7 @@ class Main extends Phaser.Scene
     this.thrust.visible = false;
   
     this.ship = this.add.container(400, 300, [this.ship_image, this.muzzle, this.thrust]);
+    this.ship.state = State.alive;
   
     this.physics.world.enable(this.ship);
     this.ship.body.setSize(this.ship_image.width, this.ship_image.height, false);
@@ -156,7 +162,7 @@ class Main extends Phaser.Scene
 
     this.health = Phaser.Math.MinSub(this.health, 10, 0);
     if (this.health === 0) {
-      this.isDead = true;
+      this.ship.state = State.dead;
       this.sounds.death.play();
       ship.destroy();
     }
@@ -171,7 +177,7 @@ class Main extends Phaser.Scene
   }
 
   update () {
-    if (!this.isDead) {
+    if (this.ship.state === State.alive) {
       if (this.cursors.up.isDown) {
         this.physics.velocityFromRotation(this.ship.rotation, 200, this.ship.body.acceleration);
         this.thrust.visible = true;
@@ -190,8 +196,7 @@ class Main extends Phaser.Scene
     
       if (this.input.keyboard.checkDown(this.keySpace, 100)) {
         let off = Phaser.Math.RotateAroundDistance({x: this.ship.x, y: this.ship.y},
-            this.ship.x, this.ship.y, this.ship.rotation,
-            this.ship_image.width/2);; //, this.ship_image.height/2); //this.muzzle.width / 2);
+            this.ship.x, this.ship.y, this.ship.rotation, this.ship_image.width/2);
         if (this.bullets.fireBullet(off.x, off.y, this.ship.rotation)) {
           this.muzzle.setVisible(true);
           this.sounds.laser.play();
