@@ -5,7 +5,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     this.enableBody(true, x, y, true, true);
 
     this.setRotation(rotation);
-    this.scene.physics.velocityFromRotation(rotation, 200, this.body.velocity);
+    this.scene.physics.velocityFromRotation(rotation, 500, this.body.velocity);
   }
 
   preUpdate (time, delta) {
@@ -21,10 +21,10 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
 class Bullets extends Phaser.Physics.Arcade.Group
 {
   constructor (scene) {
-    super(scene.physics.world, scene);
+    super(scene.physics.world, scene, { enable: false });
 
     this.createMultiple({
-        frameQuantity: 10,
+        frameQuantity: 20,
         key: 'bullet',
         active: false,
         visible: false,
@@ -57,33 +57,44 @@ class Main extends Phaser.Scene
     this.thrust;
     this.cursors;
     this.keySpace;
+    this.isDead = false;
   }
 
   preload () {
-    this.load.image('bullet', 'assets/bullets.png');
-    this.load.image('ship', 'assets/ship.png');
-    this.load.image('muzzle-flash', 'assets/muzzle-flash.png');
-    this.load.image('asteroid1', 'assets/asteroid1.png');
-    this.load.image('asteroid2', 'assets/asteroid1.png');
+    this.load.setPath('assets/');
+
+    this.load.image('bullet', 'bullets.png');
+    this.load.image('ship', 'ship.png');
+    this.load.image('muzzle-flash', 'muzzle-flash.png');
+    this.load.image('asteroid1', 'asteroid1.png');
+    this.load.image('asteroid2', 'asteroid2.png');
+
+    this.load.audio('death', 'death.mp3');
+    this.load.audio('laser', 'laser-45816.mp3');
+    this.load.audio('ship-explosion', 'small-explosion-103779.mp3');
+    this.load.audio('rock-explosion', 'small-explosion-103931.mp3');
   }
 
   create () {
     this.bullets = new Bullets(this);
   
-    this.ship_image = this.add.image(0, 0, 'ship').setOrigin(0.5);
-    this.ship_image.setPosition(this.ship_image.width/2, this.ship_image.height/2);
+    this.ship_image = this.add.image(0, 0, 'ship');
+    //this.ship_image.setPosition(this.ship_image.width/2, this.ship_image.height/2);
+    this.ship_image.setOrigin(0.5);
+//    this.muzzle = this.add.image(this.ship_image.width/2, this.ship_image.height/2, 'muzzle-flash');
     this.muzzle = this.add.image(0, 0, 'muzzle-flash');
-    this.muzzle.setOrigin(0);
+    this.muzzle.setOrigin(0.5);
     this.muzzle.visible = false;
-    this.thrust = this.add.image(0, 0, 'bullet');
-    this.thrust.setOrigin(0);
+    this.thrust = this.add.image(-this.ship_image.width/2, 0, 'bullet');
+    //    this.thrust = this.add.image(0, this.ship_image.height/2, 'bullet');
+    this.thrust.setOrigin(0.5);
     this.thrust.visible = false;
   
     this.ship = this.add.container(400, 300, [this.ship_image, this.muzzle, this.thrust]);
   
     this.physics.world.enable(this.ship);
     this.ship.body.setSize(this.ship_image.width, this.ship_image.height, false);
-    this.ship.body.setDamping(true);
+    this.ship.body.setDamping(true);  
     this.ship.body.setDrag(0.99);
     this.ship.body.setMaxVelocity(200);
   
@@ -91,24 +102,42 @@ class Main extends Phaser.Scene
     this.keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
     this.asteroidGroup = this.physics.add.group({
-      key: 'asteroid1',
-      repeat: 10
+      key: ['asteroid1', 'asteroid2'],
+      repeat: 5,
+      randomKey: true,
     });
 
     this.asteroidGroup.children.iterate(this.createAsteroid, this);
 
     //  When the player sprite hits asteroid
-    this.physics.add.overlap(this.ship, this.asteroidGroup, this.spriteHitAsteroid, null, this);
+    this.physics.add.overlap(this.ship, this.asteroidGroup, this.shipHitAsteroid, null, this);
     this.physics.add.overlap(this.bullets, this.asteroidGroup, this.bulletHitAsteroid, null, this);
 
     // Add a new asteroid every 1 sec
-    //this.timedEvent = this.time.addEvent({ delay: 1000, callback: this.createAsteroid, callbackScope: this, loop: true });
+    this.timedEvent = this.time.addEvent({ delay: 1000, callback: this.newAsteroid, callbackScope: this, loop: true });
 
     // UI
-    this.health = 100;
+    this.health = 30;
     this.score = 0;
     this.score_box = this.add.text(10, 10, 'Score: ' + this.score, { font: '32px Courier', fill: '#ffffff' });
     this.health_box = this.add.text(10, 42, 'Health: ' + this.health, { font: '32px Courier', fill: '#ffffff' });
+
+    // Sounds
+    this.sounds = {
+        death: this.sound.add('death'),
+        laser: this.sound.add('laser'),
+        ship_explosion: this.sound.add('ship-explosion'),
+        rock_explosion: this.sound.add('rock-explosion'),
+    };
+  }
+
+  newAsteroid () {
+    let exclusion = new Phaser.Geom.Rectangle(
+      this.ship.x - 50, this.ship.y - 50, 200, 200);
+    let p = Phaser.Geom.Rectangle.RandomOutside(this.physics.world.bounds, exclusion);
+    let asteroid = this.asteroidGroup.create(p.x, p.y, 'asteroid1');
+    asteroid.setVelocity(Phaser.Math.Between(-150, 150), Phaser.Math.Between(-150, 150));
+    asteroid.setAngularVelocity(Phaser.Math.Between(-180, 180));
   }
 
   createAsteroid (asteroid) {
@@ -117,45 +146,59 @@ class Main extends Phaser.Scene
     let p = Phaser.Geom.Rectangle.RandomOutside(this.physics.world.bounds, exclusion);
     asteroid.setPosition(p.x, p.y);
     asteroid.setVelocity(Phaser.Math.Between(-150, 150), Phaser.Math.Between(-150, 150));
+    asteroid.setAngularVelocity(Phaser.Math.Between(-180, 180));
   }
 
-  spriteHitAsteroid (sprite, asteroid) {
-    asteroid.disableBody(true, true);
+  shipHitAsteroid (ship, asteroid) {
+    //asteroid.disableBody(true, true);
+    asteroid.destroy();
+    this.sounds.ship_explosion.play();
 
     this.health = Phaser.Math.MinSub(this.health, 10, 0);
+    if (this.health === 0) {
+      this.isDead = true;
+      this.sounds.death.play();
+      ship.destroy();
+    }
   }
 
   bulletHitAsteroid (bullet, asteroid) {
-    asteroid.disableBody(true, true);
+    asteroid.destroy();
     bullet.disableBody(true, true);
+    this.sounds.rock_explosion.play();
 
-    this.points += 10;
+    this.score += 10;
   }
 
   update () {
-    if (this.cursors.up.isDown) {
-      this.physics.velocityFromRotation(this.ship.rotation, 200, this.ship.body.acceleration);
-      this.thrust.visible = true;
-    } else {
-      this.ship.body.setAcceleration(0);
-      this.thrust.visible = false;
-    }
-  
-    if (this.cursors.left.isDown) {
-      this.ship.body.setAngularVelocity(-300);
-    } else if (this.cursors.right.isDown) {
-      this.ship.body.setAngularVelocity(300);
-    } else {
-      this.ship.body.setAngularVelocity(0);
-    }
-  
-    if (this.input.keyboard.checkDown(this.keySpace, 100)) {
-      let off = Phaser.Math.RotateAroundDistance({x: this.ship.x, y: this.ship.y},
-          this.ship.x, this.ship.y, this.ship.rotation, this.muzzle.width / 2);
-      if (this.bullets.fireBullet(off.x, off.y, this.ship.rotation))
-        this.muzzle.setVisible(true);  
-    } else {
-      this.muzzle.setVisible(false);
+    if (!this.isDead) {
+      if (this.cursors.up.isDown) {
+        this.physics.velocityFromRotation(this.ship.rotation, 200, this.ship.body.acceleration);
+        this.thrust.visible = true;
+      } else {
+        this.ship.body.setAcceleration(0);
+        this.thrust.visible = false;
+      }
+    
+      if (this.cursors.left.isDown) {
+        this.ship.body.setAngularVelocity(-300);
+      } else if (this.cursors.right.isDown) {
+        this.ship.body.setAngularVelocity(300);
+      } else {
+        this.ship.body.setAngularVelocity(0);
+      }
+    
+      if (this.input.keyboard.checkDown(this.keySpace, 100)) {
+        let off = Phaser.Math.RotateAroundDistance({x: this.ship.x, y: this.ship.y},
+            this.ship.x, this.ship.y, this.ship.rotation,
+            this.ship_image.width/2);; //, this.ship_image.height/2); //this.muzzle.width / 2);
+        if (this.bullets.fireBullet(off.x, off.y, this.ship.rotation)) {
+          this.muzzle.setVisible(true);
+          this.sounds.laser.play();
+        }
+      } else {
+        this.muzzle.setVisible(false);
+      }
     }
   
     this.physics.world.wrap(this.ship, 0);
@@ -179,7 +222,7 @@ const config = {
   physics: {
     default: 'arcade',
     arcade: {
-        debug: true,
+        //debug: true,
         fps: 60,
         gravity: { y: 0 }
     }
