@@ -84,22 +84,15 @@ class Main extends Phaser.Scene
     this.bullets = new Bullets(this);
   
     this.ship_image = this.add.image(0, 0, 'ship');
-    //this.ship_image.setPosition(this.ship_image.width/2, this.ship_image.height/2);
-    this.ship_image.setOrigin(0.5);
-//    this.muzzle = this.add.image(this.ship_image.width/2, this.ship_image.height/2, 'muzzle-flash');
     this.muzzle = this.add.image(0, 0, 'muzzle-flash');
-    this.muzzle.setOrigin(0.5);
     this.muzzle.visible = false;
     this.thrust = this.add.image(-this.ship_image.width/2, 0, 'bullet');
-    //    this.thrust = this.add.image(0, this.ship_image.height/2, 'bullet');
-    this.thrust.setOrigin(0.5);
     this.thrust.visible = false;
   
     this.ship = this.add.container(400, 300, [this.ship_image, this.muzzle, this.thrust]);
     this.ship.state = State.alive;
-  
+    this.ship.setSize(this.ship_image.width, this.ship_image.height, false);
     this.physics.world.enable(this.ship);
-    this.ship.body.setSize(this.ship_image.width, this.ship_image.height, false);
     this.ship.body.setDamping(true);  
     this.ship.body.setDrag(0.99);
     this.ship.body.setMaxVelocity(200);
