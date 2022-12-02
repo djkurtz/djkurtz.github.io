@@ -165,7 +165,21 @@ class Game extends Phaser.Scene
       this.sounds.death.play();
       ship.destroy();
       this.timedEvent.stop();
+      this.gameOver();
     }
+  }
+
+  gameOver () {
+    this.startText = this.make.text({
+      x: this.cameras.main.width / 2,
+      y: this.cameras.main.height / 2,
+      text: 'Game Over!',
+      style: {
+          font: '30px monospace',
+          fill: '#ffffff'
+      }
+    })
+    .setOrigin(0.5);
   }
 
   bulletHitAsteroid (bullet, asteroid) {
@@ -224,6 +238,7 @@ class Title extends Phaser.Scene
   preload () {
     this.load.setPath('assets/');
 
+    this.load.audio('jazz', 'Space Jazz.mp3');
     this.load.audio('morph', 'morphed-metal-discharged-cinematic-trailer-sound-effects-124763.mp3');
   }
 
@@ -236,6 +251,7 @@ class Title extends Phaser.Scene
 
     // Sounds
     this.startSound = this.sound.add('morph');
+    this.startSound.on('complete', this.musicDone, this);
 
     this.startText = this.make.text({
         x: this.cameras.main.width / 2,
@@ -248,13 +264,15 @@ class Title extends Phaser.Scene
     })
     .setOrigin(0.5);
 
-    this.input.on('pointerdown', () => this.startClick() );
-    this.input.on('pointerup', () => this.scene.start('game') );
+    this.input.on('pointerup', () => {
+      this.startText.setText(`Blast Off!`);
+      this.startSound.play();
+    } );
+
   }
 
-  startClick() {
-    this.startText.setText(`Blast Off!`);
-    this.startSound.play();
+  musicDone () {
+    this.scene.start('game');
   }
 
   update () { }
