@@ -50,11 +50,11 @@ const State = Object.freeze({
   dead: 1,
 });
 
-class Main extends Phaser.Scene
+class Game extends Phaser.Scene
 {
   constructor ()
   {
-    super();
+    super('game');
 
     this.bullets;
     this.ship;
@@ -78,6 +78,7 @@ class Main extends Phaser.Scene
     this.load.audio('laser', 'laser-45816.mp3');
     this.load.audio('ship-explosion', 'small-explosion-103779.mp3');
     this.load.audio('rock-explosion', 'small-explosion-103931.mp3');
+    this.load.audio('jazz', 'Space Jazz.mp3');
   }
 
   create () {
@@ -89,7 +90,10 @@ class Main extends Phaser.Scene
     this.thrust = this.add.image(-this.ship_image.width/2, 0, 'bullet');
     this.thrust.visible = false;
   
-    this.ship = this.add.container(400, 300, [this.ship_image, this.muzzle, this.thrust]);
+    const x = this.cameras.main.width / 2;
+    const y = this.cameras.main.height / 2;
+
+    this.ship = this.add.container(x, y, [this.ship_image, this.muzzle, this.thrust]);
     this.ship.state = State.alive;
     this.ship.setSize(this.ship_image.width, this.ship_image.height, false);
     this.physics.world.enable(this.ship);
@@ -128,6 +132,8 @@ class Main extends Phaser.Scene
         ship_explosion: this.sound.add('ship-explosion'),
         rock_explosion: this.sound.add('rock-explosion'),
     };
+
+    this.bgMusic = this.sound.add('jazz', { volume: 0.5, loop: true }).play();
   }
 
   newAsteroid () {
@@ -155,9 +161,10 @@ class Main extends Phaser.Scene
 
     this.health = Phaser.Math.MinSub(this.health, 10, 0);
     if (this.health === 0) {
-      this.ship.state = State.dead;
+      ship.state = State.dead;
       this.sounds.death.play();
       ship.destroy();
+      this.timedEvent.stop();
     }
   }
 
@@ -207,14 +214,60 @@ class Main extends Phaser.Scene
   }
 }
 
+class Title extends Phaser.Scene
+{
+  constructor ()
+  {
+    super('title');
+  }
+
+  preload () {
+    this.load.setPath('assets/');
+
+    this.load.audio('morph', 'morphed-metal-discharged-cinematic-trailer-sound-effects-124763.mp3');
+  }
+
+  create () {
+//    const startButton = this.add.text(0, 0, 'Start', { fill: '#00ff00' });
+//    startButton.setInteractive();
+//    const zone = this.add.zone(this.config.width / 2, this.config.height/2,
+//        this.config.width, this.config.height);
+//    Phaser.Display.Align.In.Center(startButton, zone);
+
+    // Sounds
+    this.startSound = this.sound.add('morph');
+
+    this.startText = this.make.text({
+        x: this.cameras.main.width / 2,
+        y: this.cameras.main.height / 2,
+        text: 'Click anywhere to launch...',
+        style: {
+            font: '20px monospace',
+            fill: '#ffffff'
+        }
+    })
+    .setOrigin(0.5);
+
+    this.input.on('pointerdown', () => this.startClick() );
+    this.input.on('pointerup', () => this.scene.start('game') );
+  }
+
+  startClick() {
+    this.startText.setText(`Blast Off!`);
+    this.startSound.play();
+  }
+
+  update () { }
+}
+
+
 const config = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
   backgroundColor: '#000000',
-  parent: 'phaser-example',
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   physics: {
@@ -225,7 +278,7 @@ const config = {
         gravity: { y: 0 }
     }
   },
-  scene: Main
+  scene: [ Title, Game ],
 };
 
 let game = new Phaser.Game(config);
