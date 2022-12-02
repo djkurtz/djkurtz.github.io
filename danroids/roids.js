@@ -164,7 +164,7 @@ class Game extends Phaser.Scene
       ship.state = State.dead;
       this.sounds.death.play();
       ship.destroy();
-      this.timedEvent.stop();
+      this.timedEvent.remove();
       this.gameOver();
     }
   }
@@ -238,7 +238,6 @@ class Title extends Phaser.Scene
   preload () {
     this.load.setPath('assets/');
 
-    this.load.audio('jazz', 'Space Jazz.mp3');
     this.load.audio('morph', 'morphed-metal-discharged-cinematic-trailer-sound-effects-124763.mp3');
   }
 
