@@ -68,17 +68,17 @@ class Game extends Phaser.Scene
   preload () {
     this.load.setPath('assets/');
 
-    this.load.image('bullet', 'bullets.png');
-    this.load.image('ship', 'ship.png');
-    this.load.image('muzzle-flash', 'muzzle-flash.png');
     this.load.image('asteroid1', 'asteroid1.png');
     this.load.image('asteroid2', 'asteroid2.png');
+    this.load.image('bullet', 'bullets.png');
+    this.load.image('muzzle-flash', 'muzzle-flash.png');
+    this.load.image('ship', 'ship.png');
 
     this.load.audio('death', 'death.mp3');
     this.load.audio('laser', 'laser-45816.mp3');
-    this.load.audio('ship-explosion', 'small-explosion-103779.mp3');
-    this.load.audio('rock-explosion', 'small-explosion-103931.mp3');
     this.load.audio('jazz', 'Space Jazz.mp3');
+    this.load.audio('rock-explosion', 'small-explosion-103931.mp3');
+    this.load.audio('ship-explosion', 'small-explosion-103779.mp3');
   }
 
   create () {
