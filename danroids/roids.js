@@ -66,6 +66,65 @@ class Game extends Phaser.Scene
   }
 
   preload () {
+    const cx = this.cameras.main.width / 2;
+    const cy = this.cameras.main.height / 2;
+
+    let progressBar = this.add.graphics();
+    let progressBox = this.add.graphics();
+    progressBox.fillStyle(0x222222, 0.8);
+    progressBox.fillRect(cx - 160, cy - 30, 320, 50);
+    
+    var loadingText = this.make.text({
+        x: cx,
+        y: cy - 50,
+        text: 'Loading...',
+        style: {
+            font: '20px monospace',
+            fill: '#ffffff'
+        }
+    });
+    loadingText.setOrigin(0.5, 0.5);
+    
+    var percentText = this.make.text({
+        x: cx,
+        y: cy - 5,
+        text: '0%',
+        style: {
+            font: '18px monospace',
+            fill: '#ffffff'
+        }
+    });
+    percentText.setOrigin(0.5, 0.5);
+    
+    var assetText = this.make.text({
+        x: cx,
+        y: cy + 50,
+        text: '',
+        style: {
+            font: '18px monospace',
+            fill: '#ffffff'
+        }
+    });
+    assetText.setOrigin(0.5, 0.5);
+    
+    this.load.on('progress', function (value) {
+        percentText.setText(parseInt(value * 100) + '%');
+        progressBar.clear();
+        progressBar.fillStyle(0xffffff, 1);
+        progressBar.fillRect(cx - 150, cy - 20, 300 * value, 30);
+    });
+    
+    this.load.on('fileprogress', function (file) {
+        assetText.setText('Loading asset: ' + file.key);
+    });
+    this.load.on('complete', function () {
+        progressBar.destroy();
+        progressBox.destroy();
+        loadingText.destroy();
+        percentText.destroy();
+        assetText.destroy();
+    });
+
     this.load.setPath('assets/');
 
     this.load.image('asteroid1', 'asteroid1.png');
@@ -79,6 +138,7 @@ class Game extends Phaser.Scene
     this.load.audio('jazz', 'Space Jazz.mp3');
     this.load.audio('rock-explosion', 'small-explosion-103931.mp3');
     this.load.audio('ship-explosion', 'small-explosion-103779.mp3');
+    this.load.audio('thrust', '547442__mango777__loopingthrust.ogg');
   }
 
   create () {
@@ -131,14 +191,18 @@ class Game extends Phaser.Scene
         laser: this.sound.add('laser'),
         ship_explosion: this.sound.add('ship-explosion'),
         rock_explosion: this.sound.add('rock-explosion'),
+        thrust: this.sound.add('thrust', { volume: 0.5, loop: true }),
     };
 
-    this.bgMusic = this.sound.add('jazz', { volume: 0.5, loop: true }).play();
+    this.sounds.thrust.play();
+    this.sounds.thrust.pause();
+
+    this.bgMusic = this.sound.add('jazz', { volume: 0.2, loop: true }).play();
   }
 
   newAsteroid () {
     let exclusion = new Phaser.Geom.Rectangle(
-      this.ship.x - 50, this.ship.y - 50, 200, 200);
+      this.ship.x - 150, this.ship.y - 150, 200, 200);
     let p = Phaser.Geom.Rectangle.RandomOutside(this.physics.world.bounds, exclusion);
     let asteroid = this.asteroidGroup.create(p.x, p.y, 'asteroid1');
     asteroid.setVelocity(Phaser.Math.Between(-150, 150), Phaser.Math.Between(-150, 150));
@@ -147,7 +211,7 @@ class Game extends Phaser.Scene
 
   createAsteroid (asteroid) {
     let exclusion = new Phaser.Geom.Rectangle(
-        this.ship.x - 50, this.ship.y - 50, 200, 200);
+        this.ship.x - 150, this.ship.y - 150, 200, 200);
     let p = Phaser.Geom.Rectangle.RandomOutside(this.physics.world.bounds, exclusion);
     asteroid.setPosition(p.x, p.y);
     asteroid.setVelocity(Phaser.Math.Between(-150, 150), Phaser.Math.Between(-150, 150));
@@ -163,6 +227,7 @@ class Game extends Phaser.Scene
     if (this.health === 0) {
       ship.state = State.dead;
       this.sounds.death.play();
+      this.sounds.thrust.stop();
       ship.destroy();
       this.timedEvent.remove();
       this.gameOver();
@@ -194,9 +259,11 @@ class Game extends Phaser.Scene
     if (this.ship.state === State.alive) {
       if (this.cursors.up.isDown) {
         this.physics.velocityFromRotation(this.ship.rotation, 200, this.ship.body.acceleration);
+        this.sounds.thrust.resume();
         this.thrust.visible = true;
       } else {
         this.ship.body.setAcceleration(0);
+        this.sounds.thrust.pause();
         this.thrust.visible = false;
       }
     
@@ -238,43 +305,41 @@ class Title extends Phaser.Scene
   preload () {
     this.load.setPath('assets/');
 
-    this.load.audio('morph', 'morphed-metal-discharged-cinematic-trailer-sound-effects-124763.mp3');
+    this.load.audio('blastoff', '125810__robinhood76__02578-rocket-start.wav'); 
+    //this.load.audio('morph', 'morphed-metal-discharged-cinematic-trailer-sound-effects-124763.mp3');
   }
 
   create () {
-//    const startButton = this.add.text(0, 0, 'Start', { fill: '#00ff00' });
-//    startButton.setInteractive();
-//    const zone = this.add.zone(this.config.width / 2, this.config.height/2,
-//        this.config.width, this.config.height);
-//    Phaser.Display.Align.In.Center(startButton, zone);
-
     // Sounds
-    this.startSound = this.sound.add('morph');
-    this.startSound.on('complete', this.musicDone, this);
+    this.startSound = this.sound.add('blastoff');
+    this.startSound.on('complete', this.startGame, this);
+
+    const cx = this.cameras.main.width / 2;
+    const cy = this.cameras.main.height / 2 + 50;
 
     this.startText = this.make.text({
-        x: this.cameras.main.width / 2,
-        y: this.cameras.main.height / 2,
-        text: 'Click anywhere to launch...',
-        style: {
-            font: '20px monospace',
-            fill: '#ffffff'
-        }
-    })
-    .setOrigin(0.5);
+        x: cx, y: cy, text: 'Click anywhere to launch...',
+        style: { font: '20px monospace', fill: '#ffffff' }
+    }).setOrigin(0.5);
 
-    this.input.on('pointerup', () => {
+    this.titleText = this.make.text({
+      x: cx, y: cy - 100, text: 'Dansteroids',
+      style: { font: '50px cursive', fill: '#ffffff' }
+    }).setOrigin(0.5);
+
+    this.input.on('pointerdown', () => {
       this.startText.setText(`Blast Off!`);
       this.startSound.play();
     } );
 
   }
 
-  musicDone () {
+  startGame () {
     this.scene.start('game');
   }
 
-  update () { }
+  update () { 
+  }
 }
 
 
