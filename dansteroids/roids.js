@@ -25,7 +25,7 @@ class Bullets extends Phaser.Physics.Arcade.Group
     super(scene.physics.world, scene, { enable: false });
 
     this.createMultiple({
-        frameQuantity: 5,
+        frameQuantity: 10,
         key: 'bullet',
         active: false,
         visible: false,
@@ -190,9 +190,9 @@ class Game extends Phaser.Scene
       }
     
       if (this.cursors.left.isDown) {
-        this.ship.body.setAngularVelocity(-300);
+        this.ship.body.setAngularVelocity(-250);
       } else if (this.cursors.right.isDown) {
-        this.ship.body.setAngularVelocity(300);
+        this.ship.body.setAngularVelocity(250);
       } else {
         this.ship.body.setAngularVelocity(0);
       }
