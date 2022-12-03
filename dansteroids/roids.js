@@ -252,49 +252,39 @@ class Title extends Phaser.Scene
     const cx = this.cameras.main.width / 2;
     const cy = this.cameras.main.height / 2;
 
-    let progressBar = this.add.graphics();
-    let progressBox = this.add.graphics();
-    progressBox.fillStyle(0x222222, 0.8);
-    progressBox.fillRect(cx - 160, cy - 30, 320, 50);
+    this.progressBar = this.add.graphics();
+    this.progressBox = this.add.graphics();
+    this.progressBox.fillStyle(0x222222, 0.8);
+    this.progressBox.fillRect(cx - 160, cy - 30, 320, 50);
     
-    let loadingText = this.make.text({
+    this.loadingText = this.make.text({
         x: cx, y: cy - 50,
         text: 'Loading...',
         style: { font: '20px monospace', fill: '#ffffff' }
-    });
-    loadingText.setOrigin(0.5, 0.5);
+    }).setOrigin(0.5, 0.5);
     
-    let percentText = this.make.text({
+    this.percentText = this.make.text({
         x: cx, y: cy - 5,
         text: '0%',
         style: { font: '18px monospace', fill: '#ffffff' }
-    });
-    percentText.setOrigin(0.5, 0.5);
+    }).setOrigin(0.5, 0.5);
     
-    let assetText = this.make.text({
+    this.assetText = this.make.text({
         x: cx, y: cy + 50,
         text: '',
         style: { font: '18px monospace', fill: '#ffffff' }
-    });
-    assetText.setOrigin(0.5, 0.5);
+    }).setOrigin(0.5, 0.5);
     
     this.load.on('progress', function (value) {
-        percentText.setText(parseInt(value * 100) + '%');
-        progressBar.clear();
-        progressBar.fillStyle(0xffffff, 1);
-        progressBar.fillRect(cx - 150, cy - 20, 300 * value, 30);
-    });
+        this.percentText.setText(parseInt(value * 100) + '%');
+        this.progressBar.clear();
+        this.progressBar.fillStyle(0xffffff, 1);
+        this.progressBar.fillRect(cx - 150, cy - 20, 300 * value, 30);
+    }, this);
     
     this.load.on('fileprogress', function (file) {
-        assetText.setText('Loading asset: ' + file.key);
-    });
-    this.load.once('complete', function () {
-        progressBar.destroy();
-        progressBox.destroy();
-        loadingText.destroy();
-        percentText.destroy();
-        assetText.destroy();
-    });
+      this.assetText.setText('Loading asset: ' + file.key);
+    }, this);
 
     this.titleText = this.make.text({
       x: cx, y: cy - 100, text: 'Dansteroids',
@@ -309,6 +299,12 @@ class Title extends Phaser.Scene
   }
 
   create () {
+    this.progressBar.setVisible(false);
+    this.progressBox.setVisible(false);
+    this.loadingText.setVisible(false);
+    this.percentText.setVisible(false);
+    this.assetText.setVisible(false);
+
     // Sounds
     this.startSound = this.sound.add('blastoff');
     this.startSound.on('complete', this.startGame, this);
