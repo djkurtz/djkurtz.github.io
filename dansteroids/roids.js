@@ -92,16 +92,15 @@ class Game extends Phaser.Scene
       key: ['asteroid1', 'asteroid2'],
       repeat: 5,
       randomKey: true,
+      createCallback: this.createAsteroid,
     });
-
-    this.asteroidGroup.children.iterate(this.createAsteroid, this);
 
     //  When the player sprite hits asteroid
     this.physics.add.overlap(this.ship, this.asteroidGroup, this.shipHitAsteroid, null, this);
     this.physics.add.overlap(this.bullets, this.asteroidGroup, this.bulletHitAsteroid, null, this);
 
     // Add a new asteroid every 1 sec
-    this.timedEvent = this.time.addEvent({ delay: 1000, callback: this.newAsteroid, callbackScope: this, loop: true });
+    this.timedEvent = this.time.addEvent({ delay: 1000, callback: this.newAsteroids, callbackScope: this, loop: true });
 
     // UI
     this.health = 3;
@@ -124,26 +123,21 @@ class Game extends Phaser.Scene
     this.bgMusic = this.sound.add('jazz', { volume: 0.2, loop: true }).play();
   }
 
-  newAsteroid () {
-    let exclusion = new Phaser.Geom.Rectangle(
-      this.ship.x - 150, this.ship.y - 150, 200, 200);
-    let p = Phaser.Geom.Rectangle.RandomOutside(this.physics.world.bounds, exclusion);
-    let asteroid = this.asteroidGroup.create(p.x, p.y, 'asteroid1');
-    asteroid.setVelocity(Phaser.Math.Between(-150, 150), Phaser.Math.Between(-150, 150));
-    asteroid.setAngularVelocity(Phaser.Math.Between(-180, 180));
+  newAsteroids () {
+    this.asteroidGroup.createMultiple({ key: ['asteroid1', 'asteroid2'] });
   }
 
   createAsteroid (asteroid) {
-    let exclusion = new Phaser.Geom.Rectangle(
-        this.ship.x - 150, this.ship.y - 150, 200, 200);
-    let p = Phaser.Geom.Rectangle.RandomOutside(this.physics.world.bounds, exclusion);
+    const gap = 200;
+    const exclusion = new Phaser.Geom.Rectangle(
+        this.scene.ship.x - gap / 2, this.scene.ship.y - gap / 2, gap, gap);
+    const p = Phaser.Geom.Rectangle.RandomOutside(this.scene.physics.world.bounds, exclusion);
     asteroid.setPosition(p.x, p.y);
     asteroid.setVelocity(Phaser.Math.Between(-150, 150), Phaser.Math.Between(-150, 150));
     asteroid.setAngularVelocity(Phaser.Math.Between(-180, 180));
   }
 
   shipHitAsteroid (ship, asteroid) {
-    //asteroid.disableBody(true, true);
     asteroid.destroy();
     this.sounds.ship_explosion.play();
 
@@ -159,7 +153,7 @@ class Game extends Phaser.Scene
   }
 
   gameOver () {
-    this.startText = this.make.text({
+    this.gameOverText = this.make.text({
       x: this.cameras.main.width / 2,
       y: this.cameras.main.height / 2,
       text: 'Game Over!',
@@ -167,8 +161,7 @@ class Game extends Phaser.Scene
           font: '30px monospace',
           fill: '#ffffff'
       }
-    })
-    .setOrigin(0.5);
+    }).setOrigin(0.5);
 
     this.input.on('pointerup', () => {
       this.scene.start('title');
@@ -314,6 +307,8 @@ class Title extends Phaser.Scene
       this.startText.setText(`Blast Off!`);
       this.startSound.play();
     } );
+
+    this.scene.start('game');
   }
 
   startGame () {
