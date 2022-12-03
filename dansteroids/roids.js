@@ -25,7 +25,7 @@ class Bullets extends Phaser.Physics.Arcade.Group
     super(scene.physics.world, scene, { enable: false });
 
     this.createMultiple({
-        frameQuantity: 20,
+        frameQuantity: 5,
         key: 'bullet',
         active: false,
         visible: false,
@@ -89,9 +89,6 @@ class Game extends Phaser.Scene
     this.keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
     this.asteroidGroup = this.physics.add.group({
-      key: ['asteroid1', 'asteroid2'],
-      repeat: 5,
-      randomKey: true,
       createCallback: this.createAsteroid,
     });
 
@@ -100,7 +97,7 @@ class Game extends Phaser.Scene
     this.physics.add.overlap(this.bullets, this.asteroidGroup, this.bulletHitAsteroid, null, this);
 
     // Add a new asteroid every 1 sec
-    this.timedEvent = this.time.addEvent({ delay: 1000, callback: this.newAsteroids, callbackScope: this, loop: true });
+    this.timedEvent = this.time.addEvent({ delay: 1000, callback: this.newAsteroid, callbackScope: this, loop: true });
 
     // UI
     this.health = 3;
@@ -123,16 +120,20 @@ class Game extends Phaser.Scene
     this.bgMusic = this.sound.add('jazz', { volume: 0.2, loop: true }).play();
   }
 
-  newAsteroids () {
-    this.asteroidGroup.createMultiple({ key: ['asteroid1', 'asteroid2'] });
+  newAsteroid () {
+    const gap = 300;
+    const exclusion = new Phaser.Geom.Rectangle(
+        this.ship.x - gap / 2, this.ship.y - gap / 2, gap, gap);
+    const p = Phaser.Geom.Rectangle.RandomOutside(this.physics.world.bounds, exclusion);
+    this.asteroidGroup.createFromConfig({ 
+      key: ['asteroid1', 'asteroid2'],
+      randomKey: true,
+      max: 1,
+      setXY: p,
+    });
   }
 
   createAsteroid (asteroid) {
-    const gap = 200;
-    const exclusion = new Phaser.Geom.Rectangle(
-        this.scene.ship.x - gap / 2, this.scene.ship.y - gap / 2, gap, gap);
-    const p = Phaser.Geom.Rectangle.RandomOutside(this.scene.physics.world.bounds, exclusion);
-    asteroid.setPosition(p.x, p.y);
     asteroid.setVelocity(Phaser.Math.Between(-150, 150), Phaser.Math.Between(-150, 150));
     asteroid.setAngularVelocity(Phaser.Math.Between(-180, 180));
   }
@@ -209,7 +210,7 @@ class Game extends Phaser.Scene
     }
   
     this.physics.world.wrap(this.ship, 0);
-    this.physics.world.wrap(this.asteroidGroup, 32);
+    this.physics.world.wrap(this.asteroidGroup, 0);
 
     this.health_box.setText('Health: ' + this.health);
     this.score_box.setText('Score: ' + this.score);
