@@ -65,82 +65,6 @@ class Game extends Phaser.Scene
     this.keySpace;
   }
 
-  preload () {
-    const cx = this.cameras.main.width / 2;
-    const cy = this.cameras.main.height / 2;
-
-    let progressBar = this.add.graphics();
-    let progressBox = this.add.graphics();
-    progressBox.fillStyle(0x222222, 0.8);
-    progressBox.fillRect(cx - 160, cy - 30, 320, 50);
-    
-    var loadingText = this.make.text({
-        x: cx,
-        y: cy - 50,
-        text: 'Loading...',
-        style: {
-            font: '20px monospace',
-            fill: '#ffffff'
-        }
-    });
-    loadingText.setOrigin(0.5, 0.5);
-    
-    var percentText = this.make.text({
-        x: cx,
-        y: cy - 5,
-        text: '0%',
-        style: {
-            font: '18px monospace',
-            fill: '#ffffff'
-        }
-    });
-    percentText.setOrigin(0.5, 0.5);
-    
-    var assetText = this.make.text({
-        x: cx,
-        y: cy + 50,
-        text: '',
-        style: {
-            font: '18px monospace',
-            fill: '#ffffff'
-        }
-    });
-    assetText.setOrigin(0.5, 0.5);
-    
-    this.load.on('progress', function (value) {
-        percentText.setText(parseInt(value * 100) + '%');
-        progressBar.clear();
-        progressBar.fillStyle(0xffffff, 1);
-        progressBar.fillRect(cx - 150, cy - 20, 300 * value, 30);
-    });
-    
-    this.load.on('fileprogress', function (file) {
-        assetText.setText('Loading asset: ' + file.key);
-    });
-    this.load.on('complete', function () {
-        progressBar.destroy();
-        progressBox.destroy();
-        loadingText.destroy();
-        percentText.destroy();
-        assetText.destroy();
-    });
-
-    this.load.setPath('assets/');
-
-    this.load.image('asteroid1', 'asteroid1.png');
-    this.load.image('asteroid2', 'asteroid2.png');
-    this.load.image('bullet', 'bullets.png');
-    this.load.image('muzzle-flash', 'muzzle-flash.png');
-    this.load.image('ship', 'ship.png');
-
-    this.load.audio('death', 'death.mp3');
-    this.load.audio('laser', 'laser-45816.mp3');
-    this.load.audio('jazz', 'Space Jazz.mp3');
-    this.load.audio('rock-explosion', 'small-explosion-103931.mp3');
-    this.load.audio('ship-explosion', 'small-explosion-103779.mp3');
-    this.load.audio('thrust', '547442__mango777__loopingthrust.ogg');
-  }
-
   create () {
     this.bullets = new Bullets(this);
   
@@ -180,7 +104,7 @@ class Game extends Phaser.Scene
     this.timedEvent = this.time.addEvent({ delay: 1000, callback: this.newAsteroid, callbackScope: this, loop: true });
 
     // UI
-    this.health = 30;
+    this.health = 3;
     this.score = 0;
     this.score_box = this.add.text(10, 10, 'Score: ' + this.score, { font: '32px Courier', fill: '#ffffff' });
     this.health_box = this.add.text(10, 42, 'Health: ' + this.health, { font: '32px Courier', fill: '#ffffff' });
@@ -223,7 +147,7 @@ class Game extends Phaser.Scene
     asteroid.destroy();
     this.sounds.ship_explosion.play();
 
-    this.health = Phaser.Math.MinSub(this.health, 10, 0);
+    this.health = Phaser.Math.MinSub(this.health, 1, 0);
     if (this.health === 0) {
       ship.state = State.dead;
       this.sounds.death.play();
@@ -245,6 +169,10 @@ class Game extends Phaser.Scene
       }
     })
     .setOrigin(0.5);
+
+    this.input.on('pointerup', () => {
+      this.scene.start('title');
+    } );
   }
 
   bulletHitAsteroid (bullet, asteroid) {
@@ -303,10 +231,81 @@ class Title extends Phaser.Scene
   }
 
   preload () {
-    this.load.setPath('assets/');
-
-    this.load.audio('blastoff', '125810__robinhood76__02578-rocket-start.wav'); 
+    this.load.setPath('assets/audio/');
+    this.load.audio('blastoff', '361250__japanyoshithegamer__sci-fi-engine-startup.wav'); 
+//    this.load.audio('blastoff', '125810__robinhood76__02578-rocket-start.wav'); 
+    this.load.audio('death', 'death.mp3');
+    this.load.audio('laser', 'laser-45816.mp3');
     //this.load.audio('morph', 'morphed-metal-discharged-cinematic-trailer-sound-effects-124763.mp3');
+    this.load.audio('jazz', 'Space Jazz.mp3');
+    this.load.audio('rock-explosion', 'small-explosion-103931.mp3');
+    this.load.audio('ship-explosion', 'small-explosion-103779.mp3');
+    this.load.audio('thrust', '547442__mango777__loopingthrust.ogg');
+
+    this.load.setPath('assets/img/');
+    this.load.image('asteroid1', 'asteroid1.png');
+    this.load.image('asteroid2', 'asteroid2.png');
+    this.load.image('bullet', 'bullets.png');
+    this.load.image('muzzle-flash', 'muzzle-flash.png');
+    this.load.image('ship', 'ship.png');
+  
+    const cx = this.cameras.main.width / 2;
+    const cy = this.cameras.main.height / 2;
+
+    let progressBar = this.add.graphics();
+    let progressBox = this.add.graphics();
+    progressBox.fillStyle(0x222222, 0.8);
+    progressBox.fillRect(cx - 160, cy - 30, 320, 50);
+    
+    let loadingText = this.make.text({
+        x: cx, y: cy - 50,
+        text: 'Loading...',
+        style: { font: '20px monospace', fill: '#ffffff' }
+    });
+    loadingText.setOrigin(0.5, 0.5);
+    
+    let percentText = this.make.text({
+        x: cx, y: cy - 5,
+        text: '0%',
+        style: { font: '18px monospace', fill: '#ffffff' }
+    });
+    percentText.setOrigin(0.5, 0.5);
+    
+    let assetText = this.make.text({
+        x: cx, y: cy + 50,
+        text: '',
+        style: { font: '18px monospace', fill: '#ffffff' }
+    });
+    assetText.setOrigin(0.5, 0.5);
+    
+    this.load.on('progress', function (value) {
+        percentText.setText(parseInt(value * 100) + '%');
+        progressBar.clear();
+        progressBar.fillStyle(0xffffff, 1);
+        progressBar.fillRect(cx - 150, cy - 20, 300 * value, 30);
+    });
+    
+    this.load.on('fileprogress', function (file) {
+        assetText.setText('Loading asset: ' + file.key);
+    });
+    this.load.once('complete', function () {
+        progressBar.destroy();
+        progressBox.destroy();
+        loadingText.destroy();
+        percentText.destroy();
+        assetText.destroy();
+    });
+
+    this.titleText = this.make.text({
+      x: cx, y: cy - 100, text: 'Dansteroids',
+      style: { font: '50px cursive', fill: '#ffffff' }
+    }).setOrigin(0.5);
+
+    this.startText = this.make.text({
+      x: cx, y: cy, text: 'Click anywhere to launch...',
+      style: { font: '20px monospace', fill: '#ffffff' }
+    }).setOrigin(0.5);
+    this.startText.setVisible(false);
   }
 
   create () {
@@ -314,31 +313,15 @@ class Title extends Phaser.Scene
     this.startSound = this.sound.add('blastoff');
     this.startSound.on('complete', this.startGame, this);
 
-    const cx = this.cameras.main.width / 2;
-    const cy = this.cameras.main.height / 2 + 50;
-
-    this.startText = this.make.text({
-        x: cx, y: cy, text: 'Click anywhere to launch...',
-        style: { font: '20px monospace', fill: '#ffffff' }
-    }).setOrigin(0.5);
-
-    this.titleText = this.make.text({
-      x: cx, y: cy - 100, text: 'Dansteroids',
-      style: { font: '50px cursive', fill: '#ffffff' }
-    }).setOrigin(0.5);
-
+    this.startText.setVisible(true);
     this.input.on('pointerdown', () => {
       this.startText.setText(`Blast Off!`);
       this.startSound.play();
     } );
-
   }
 
   startGame () {
     this.scene.start('game');
-  }
-
-  update () { 
   }
 }
 
