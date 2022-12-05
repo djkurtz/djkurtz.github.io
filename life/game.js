@@ -30,19 +30,20 @@ class Game extends Phaser.Scene
     this.interval_idx = config.interval.start_idx;
     this.population = 0;
     this.border_spacing = config.cell.size + config.cell.border.thickness;
+    this.live_chance = config.start_live_chance;
 
     this.run = true;
   }
 
   create () {
     this.tick_text = this.add.text(10, 10, 'Ticks: ' + this.ticks,
-        { font: '14px Monospace', fill: '#ffffff' });
+        { font: '14px Arial Black', fill: '#ffffff' });
     this.interval_text = this.add.text(210, 10, 'Interval: ' + this.interval_get() + ' ms',
-        { font: '14px Monospace', fill: '#ffffff' });
+        { font: '14px Arial Black', fill: '#ffffff' });
     this.population_text = this.add.text(410, 10, 'Population: 0',
-        { font: '14px Monospace', fill: '#ffffff' });
+        { font: '14px Arial Black', fill: '#ffffff' });
     this.pause_text = this.add.text(610, 10, 'PAUSED',
-        { font: '14px Monospace', fill: '#880000' }).setVisible(false);
+        { font: '14px Arial Black', fill: '#ffffff', backgroundColor: '#ff0000' }).setVisible(false);
 
     const pw = this.cameras.main.width - 2 * config.border.min;
     const ph = this.cameras.main.height - 2 * config.border.min - config.border.menu;
@@ -56,7 +57,9 @@ class Game extends Phaser.Scene
     this.input.keyboard.on('keydown-UP', function(event) { this.interval_dec(); }, this);
     this.input.keyboard.on('keydown-DOWN', function(event) { this.interval_inc(); }, this);
 
-    this.input.keyboard.on('keydown-S', function(event) { this.stop_start(); }, this);
+    this.input.keyboard.on('keydown-S', function(event) { this.toggle(); }, this);
+    this.input.keyboard.on('keydown-C', function(event) { this.clear(); }, this);
+    this.input.keyboard.on('keydown-R', function(event) { this.randomize(); }, this);
 
     this.graphics = this.add.graphics();
 
@@ -65,15 +68,35 @@ class Game extends Phaser.Scene
     for (let y = 0; y < this.Ny; y++) {
       this.cells[y] = new Array(this.Nx);
       for (let x = 0; x < this.Nx; x++) {
-        this.cells[y][x] = (Math.random() <= config.start_live_chance) ? 1 : 0;
+        this.cells[y][x] = (Math.random() <= this.live_chance) ? 1 : 0;
       }
     }
 
-//    this.cells[1][1] = 1;
-//    this.cells[1][2] = 1;
-//    this.cells[1][3] = 1;
+    this.randomize();
+    this.start();
+  }
 
-    // Draw cells
+  clear() {
+    for (let y = 0; y < this.Ny; y++) {
+      this.cells[y].fill(0);
+    }
+    this.drawCells();
+    this.ticks = 0;
+    this.stop();
+  }
+
+  randomize() {
+    for (let y = 0; y < this.Ny; y++) {
+      for (let x = 0; x < this.Nx; x++) {
+        this.cells[y][x] = (Math.random() <= this.live_chance) ? 1 : 0;
+      }
+    }
+    this.drawCells();
+    this.ticks = 0;
+    this.stop();
+  }
+
+  drawCells() {
     for (let y = 0; y < this.Ny; y++) {
       for (let x = 0; x < this.Nx; x++) {
         this.drawCell(x, y, this.cells[y][x]);
@@ -91,8 +114,18 @@ class Game extends Phaser.Scene
     this.graphics.fillRect(dx, dy, config.cell.size, config.cell.size);
   }
 
-  stop_start () {
-    this.run = !this.run;
+  toggle () {
+    if (this.run) this.stop();
+    else this.start();
+  }
+
+  start () {
+    this.run = true;
+    this.pause_text.setVisible(!this.run);
+  }
+
+  stop () {
+    this.run = false;
     this.pause_text.setVisible(!this.run);
   }
 
