@@ -3,7 +3,7 @@ const config = {
     size: 20,
     border: {
       thickness: 1,
-      color: 0xFFFFFF,
+      color: 0x888888,
     },
   },
   dead_color: 0x000000,
@@ -61,6 +61,8 @@ class Game extends Phaser.Scene
     this.input.keyboard.on('keydown-C', function(event) { this.clear(); }, this);
     this.input.keyboard.on('keydown-R', function(event) { this.randomize(); }, this);
 
+    this.input.on('pointerdown', this.handleClick, this);
+
     this.graphics = this.add.graphics();
 
     // Initialize cells
@@ -74,6 +76,17 @@ class Game extends Phaser.Scene
 
     this.randomize();
     this.start();
+  }
+
+  handleClick(pointer) {
+    let cell = this.pointer_in_cell(pointer);
+    if (!cell)
+      return;
+   
+    // toggle cell state
+    this.cells[cell.y][cell.x] = this.cells[cell.y][cell.x] ^ 1; 
+
+    this.drawCell(cell.x, cell.y, this.cells[cell.y][cell.x]);
   }
 
   clear() {
@@ -102,6 +115,19 @@ class Game extends Phaser.Scene
         this.drawCell(x, y, this.cells[y][x]);
       }
     }
+  }
+
+  pointer_in_cell(pointer) {
+    const cellx = Math.floor((pointer.x - this.Sx) / this.border_spacing);
+    const celly = Math.floor((pointer.y - this.Sy) / this.border_spacing);
+    if (cellx < 0 || cellx >= this.Nx || celly < 0 || celly >= this.Ny)
+      return null;
+
+    // TODO: ignore click on border between cells
+//    const dx = this.Sx + x * this.border_spacing;
+//    const dy = this.Sy + y * this.border_spacing;
+
+    return { x: cellx, y: celly };
   }
 
   drawCell(x, y, cell) {
