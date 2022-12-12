@@ -1,3 +1,8 @@
+const State = Object.freeze({
+  dead: 0,
+  alive: 1,
+});
+
 const config = {
   cell: {
     size: 20,
@@ -7,7 +12,7 @@ const config = {
     },
   },
   dead_color: 0x000000,
-  live_color: 0xffffff,
+  alive_color: 0xffffff,
   border: {
     menu: 20,
     min: 10,
@@ -19,6 +24,142 @@ const config = {
   start_live_chance: 0.5,
 };
 
+class Cell extends Phaser.GameObjects.Rectangle
+{
+  constructor (world, x, y, width, height) {
+    super(world.scene, x * width, y * width, width, height, config.dead_color);
+
+    this.world = world;
+    this.neighbors;
+
+    this.setOrigin(0);
+    this.setInteractive();
+    this.on('pointerdown', function () { this.toggle_state(); });
+
+    this.setStrokeStyle(config.cell.border.thickness, config.cell.border.color);
+    this.state = State.dead;
+//    this.set_dead();
+
+    world.scene.add.existing(this);
+  }
+
+  set_dead() {
+    this.state = State.dead;
+    this.setFillStyle(config.dead_color);
+  }
+
+  set_alive() {
+    this.state = State.alive;
+    this.setFillStyle(config.alive_color);
+  }
+
+  is_alive() {
+    switch (this.state) {
+      case State.dead: { return false; }
+      case State.alive: { return true; }
+    }
+  }
+
+  toggle_state() {
+    switch (this.state) {
+      case State.dead: { this.set_alive(); break; }
+      case State.alive: { this.set_dead(); break; }
+    }
+  }
+
+  set_neighbors(neighbors) {
+    this.neighbors = neighbors;
+  }
+
+  compute_next_state() {
+    let sum = 0;
+    this.neighbors.forEach(n => { if (n.is_alive()) sum += 1; });
+    this.next_state = (sum == 3 || (sum == 2 && this.is_alive())) ? State.alive : State.dead;
+  }
+
+  update_state() {
+    switch (this.next_state) {
+      case State.alive: this.set_alive(); break;
+      case State.dead: this.set_dead(); break;
+    }
+  }
+}
+
+class World extends Phaser.GameObjects.Container
+{
+  constructor (scene, world_min_x, world_min_y, world_max_width, world_max_height) {
+    const Nx = Math.floor(world_max_width / config.cell.size);
+    const Ny = Math.floor(world_max_height / config.cell.size);
+
+    const world_width = Nx * config.cell.size;
+    const world_height = Ny * config.cell.size;
+
+    const world_x = world_min_x + Math.floor((world_max_width - world_width) / 2);
+    const world_y = world_min_y + Math.floor((world_max_height - world_height) / 2);
+
+    super(scene, world_x, world_y);
+
+    this.Nx = Nx;
+    this.Ny = Ny;
+
+    // Initialize cells
+    this.cells = new Array(this.Ny);
+    for (let y = 0; y < this.Ny; y++) {
+      this.cells[y] = new Array(this.Nx);
+      for (let x = 0; x < this.Nx; x++) {
+        this.cells[y][x] = new Cell(this, x, y, config.cell.size, config.cell.size);
+        this.add(this.cells[y][x]);
+      }
+    }
+
+    for (let y = 0; y < this.Ny; y++) {
+      for (let x = 0; x < this.Nx; x++) {
+        this.cells[y][x].set_neighbors([
+          this.cells[(y - 1 + this.Ny) % this.Ny][(x - 1 + this.Nx) % this.Nx],
+          this.cells[(y + 0 + this.Ny) % this.Ny][(x - 1 + this.Nx) % this.Nx],
+          this.cells[(y + 1 + this.Ny) % this.Ny][(x - 1 + this.Nx) % this.Nx],
+          this.cells[(y - 1 + this.Ny) % this.Ny][(x - 0 + this.Nx) % this.Nx],
+          this.cells[(y + 1 + this.Ny) % this.Ny][(x - 0 + this.Nx) % this.Nx],
+          this.cells[(y - 1 + this.Ny) % this.Ny][(x + 1 + this.Nx) % this.Nx],
+          this.cells[(y + 0 + this.Ny) % this.Ny][(x + 1 + this.Nx) % this.Nx],
+          this.cells[(y + 1 + this.Ny) % this.Ny][(x + 1 + this.Nx) % this.Nx]
+        ]);
+      }
+    }
+
+    scene.add.existing(this);
+  }
+
+  clear() {
+    this.cells.forEach(row => row.forEach(cell => cell.set_dead()));
+  }
+
+  randomize(live_chance) {
+    this.cells.forEach(row => row.forEach(cell => { 
+      const r = Math.random();
+      if (r <= live_chance) { cell.set_alive(); }
+      else { cell.set_dead(); }
+    }));
+  }
+
+  update_cells() {
+    this.cells.forEach(row => row.forEach(cell => cell.compute_next_state()));
+    this.cells.forEach(row => row.forEach(cell => cell.update_state()));
+  }
+
+  get_population() {
+    let population = 0;
+    for (let y = 0; y < this.Ny; y++) {
+      for (let x = 0; x < this.Nx; x++) {
+        if (this.cells[y][x].is_alive()) {
+          population += 1;
+        }
+      }
+    }
+    return population;
+  }
+}
+
 class Game extends Phaser.Scene
 {
   constructor () {
@@ -29,10 +170,9 @@ class Game extends Phaser.Scene
     this.ticks = 0;
     this.interval_idx = config.interval.start_idx;
     this.population = 0;
-    this.border_spacing = config.cell.size + config.cell.border.thickness;
     this.live_chance = config.start_live_chance;
 
-    this.run = true;
+    this.run = false;
   }
 
   create () {
@@ -45,14 +185,10 @@ class Game extends Phaser.Scene
     this.pause_text = this.add.text(610, 10, 'PAUSED',
         { font: '14px Arial Black', fill: '#ffffff', backgroundColor: '#ff0000' }).setVisible(false);
 
-    const pw = this.cameras.main.width - 2 * config.border.min;
-    const ph = this.cameras.main.height - 2 * config.border.min - config.border.menu;
-
-    this.Nx = Math.floor((pw - config.cell.border.thickness) / this.border_spacing);
-    this.Ny = Math.floor((ph - config.cell.border.thickness) / this.border_spacing);
-
-    this.Sx = Math.floor((this.cameras.main.width - this.Nx * this.border_spacing) / 2);
-    this.Sy = Math.floor((this.cameras.main.height + config.border.menu - this.Ny * this.border_spacing) / 2);
+    const world_min_x = config.border.min;
+    const world_min_y = config.border.menu + config.border.min;
+    const world_max_width = this.cameras.main.width - 2 * config.border.min;
+    const world_max_height = this.cameras.main.height - 2 * config.border.min - config.border.menu;
 
     this.input.keyboard.on('keydown-UP', function(event) { this.interval_dec(); }, this);
     this.input.keyboard.on('keydown-DOWN', function(event) { this.interval_inc(); }, this);
@@ -61,83 +197,24 @@ class Game extends Phaser.Scene
     this.input.keyboard.on('keydown-C', function(event) { this.clear(); }, this);
     this.input.keyboard.on('keydown-R', function(event) { this.randomize(); }, this);
 
-    this.input.on('pointerdown', this.handleClick, this);
-
-    this.graphics = this.add.graphics();
-
     // Initialize cells
-    this.cells = new Array(this.Ny);
-    for (let y = 0; y < this.Ny; y++) {
-      this.cells[y] = new Array(this.Nx);
-      for (let x = 0; x < this.Nx; x++) {
-        this.cells[y][x] = (Math.random() <= this.live_chance) ? 1 : 0;
-      }
-    }
-
+    this.world = new World(this, world_min_x, world_min_y, world_max_width, world_max_height);
     this.randomize();
     this.start();
   }
 
-  handleClick(pointer) {
-    let cell = this.pointer_in_cell(pointer);
-    if (!cell)
-      return;
-   
-    // toggle cell state
-    this.cells[cell.y][cell.x] = this.cells[cell.y][cell.x] ^ 1; 
-
-    this.drawCell(cell.x, cell.y, this.cells[cell.y][cell.x]);
-  }
-
   clear() {
-    for (let y = 0; y < this.Ny; y++) {
-      this.cells[y].fill(0);
-    }
-    this.drawCells();
-    this.ticks = 0;
     this.stop();
+    this.ticks = 0;
+    this.world.clear();
+    this.population_text.setText('Population: ' + this.world.get_population());
   }
 
   randomize() {
-    for (let y = 0; y < this.Ny; y++) {
-      for (let x = 0; x < this.Nx; x++) {
-        this.cells[y][x] = (Math.random() <= this.live_chance) ? 1 : 0;
-      }
-    }
-    this.drawCells();
-    this.ticks = 0;
     this.stop();
-  }
-
-  drawCells() {
-    for (let y = 0; y < this.Ny; y++) {
-      for (let x = 0; x < this.Nx; x++) {
-        this.drawCell(x, y, this.cells[y][x]);
-      }
-    }
-  }
-
-  pointer_in_cell(pointer) {
-    const cellx = Math.floor((pointer.x - this.Sx) / this.border_spacing);
-    const celly = Math.floor((pointer.y - this.Sy) / this.border_spacing);
-    if (cellx < 0 || cellx >= this.Nx || celly < 0 || celly >= this.Ny)
-      return null;
-
-    // TODO: ignore click on border between cells
-//    const dx = this.Sx + x * this.border_spacing;
-//    const dy = this.Sy + y * this.border_spacing;
-
-    return { x: cellx, y: celly };
-  }
-
-  drawCell(x, y, cell) {
-    const dx = this.Sx + x * this.border_spacing;
-    const dy = this.Sy + y * this.border_spacing;
-    this.graphics.lineStyle(config.cell.border.thickness, config.cell.border.color);
-    this.graphics.strokeRect(dx, dy, this.border_spacing, this.border_spacing);
-    const color = cell ? config.live_color : config.dead_color
-    this.graphics.fillStyle(color);
-    this.graphics.fillRect(dx, dy, config.cell.size, config.cell.size);
+    this.ticks = 0;
+    this.world.randomize(this.live_chance);
+    this.population_text.setText('Population: ' + this.world.get_population());
   }
 
   toggle () {
@@ -185,39 +262,9 @@ class Game extends Phaser.Scene
     this.ticks += 1;
     this.tick_text.setText('Ticks: ' + this.ticks);
 
-    let next = new Array(this.Ny);
-    for (let y = 0; y < this.Ny; y++) {
-      next[y] = new Array(this.Nx);
-      for (let x = 0; x < this.Nx; x++) {
-        let s = this.count_neighbors(x, y, this.cells);
-        next[y][x] = ((s == 2 && this.cells[y][x]) || s == 3) ? 1 : 0;
-        if (next[y][x] != this.cells[y][x])
-          this.drawCell(x, y, next[y][x]);
-      }
-    }
+    this.world.update_cells();
 
-    let population = 0;
-    for (let y = 0; y < this.Ny; y++) {
-      for (let x = 0; x < this.Nx; x++) {
-        this.cells[y][x] = next[y][x];
-        population += next[y][x];
-      }
-    }
-    this.population = population;
-    this.population_text.setText('Population: ' + this.population);
-  }
-
-  count_neighbors(x, y, cells) {
-    let sum = 0;
-    if (cells[(y - 1 + this.Ny) % this.Ny][(x - 1 + this.Nx) % this.Nx]) sum++;
-    if (cells[(y + 0 + this.Ny) % this.Ny][(x - 1 + this.Nx) % this.Nx]) sum++;
-    if (cells[(y + 1 + this.Ny) % this.Ny][(x - 1 + this.Nx) % this.Nx]) sum++;
-    if (cells[(y - 1 + this.Ny) % this.Ny][(x - 0 + this.Nx) % this.Nx]) sum++;
-    if (cells[(y + 1 + this.Ny) % this.Ny][(x - 0 + this.Nx) % this.Nx]) sum++;
-    if (cells[(y - 1 + this.Ny) % this.Ny][(x + 1 + this.Nx) % this.Nx]) sum++;
-    if (cells[(y + 0 + this.Ny) % this.Ny][(x + 1 + this.Nx) % this.Nx]) sum++;
-    if (cells[(y + 1 + this.Ny) % this.Ny][(x + 1 + this.Nx) % this.Nx]) sum++;
-    return sum;
+    this.population_text.setText('Population: ' + this.world.get_population());
   }
 }
 
