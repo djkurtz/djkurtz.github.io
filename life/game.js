@@ -72,9 +72,25 @@ class Cell extends Phaser.GameObjects.Rectangle
   }
 
   compute_next_state() {
+    compute_next_state_b3s1234();  
+  }
+
+  compute_next_state_b3s2() {
     let sum = 0;
     this.neighbors.forEach(n => { if (n.is_alive()) sum += 1; });
     this.next_state = (sum == 3 || (sum == 2 && this.is_alive())) ? State.alive : State.dead;
+  }
+
+  compute_next_state_b3s1234() {
+    let sum = 0;
+    this.neighbors.forEach(n => { if (n.is_alive()) sum += 1; });
+    this.next_state = (sum == 3 || (this.is_alive() && sum >= 1 && sum <= 4) ? State.alive : State.dead;
+  }
+
+  compute_next_state_b3s12345() {
+    let sum = 0;
+    this.neighbors.forEach(n => { if (n.is_alive()) sum += 1; });
+    this.next_state = (sum == 3 || (this.is_alive() && sum >= 1 && sum <= 5) ? State.alive : State.dead;
   }
 
   update_state() {
