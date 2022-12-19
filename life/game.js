@@ -228,9 +228,9 @@ class Game extends Phaser.Scene
     this.input.keyboard.on('keydown-C', function(event) { this.clear(); }, this);
     this.input.keyboard.on('keydown-R', function(event) { this.randomize(); }, this);
 
-    this.input.keyboard.on('keydown-1', function(event) { this.set_rule(Rules.b3s23); }, this);
-    this.input.keyboard.on('keydown-2', function(event) { this.set_rule(Rules.b3s1234); }, this);
-    this.input.keyboard.on('keydown-3', function(event) { this.set_rule(Rules.b3s12345); }, this);
+    this.input.keyboard.on('keydown-ONE', function(event) { this.set_rule(Rules.b3s23); }, this);
+    this.input.keyboard.on('keydown-TWO', function(event) { this.set_rule(Rules.b3s1234); }, this);
+    this.input.keyboard.on('keydown-THREE', function(event) { this.set_rule(Rules.b3s12345); }, this);
 
     // Initialize cells
     this.world = new World(this, world_min_x, world_min_y, world_max_width, world_max_height);
