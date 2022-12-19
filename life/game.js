@@ -3,6 +3,24 @@ const State = Object.freeze({
   alive: 1,
 });
 
+const Rules = Object.freeze({
+  b3s23: {
+    name: 'b3s23',
+    b: [ 3 ],
+    s: [ 2, 3 ],
+  },
+  b3s1234: {
+    name: 'b3s1234',
+    b: [ 3 ],
+    s: [ 1, 2, 3, 4 ],
+  },
+  b3s12345: {
+    name: 'b3s12345',
+    b: [ 3 ],
+    s: [ 1, 2, 3, 4, 5 ],
+  },
+});
+
 const config = {
   cell: {
     size: 20,
@@ -22,6 +40,7 @@ const config = {
     start_idx: 4,
   },
   start_live_chance: 0.5,
+  rule: Rules.b3s23,
 };
 
 class Cell extends Phaser.GameObjects.Rectangle
@@ -32,6 +51,8 @@ class Cell extends Phaser.GameObjects.Rectangle
     this.world = world;
     this.neighbors;
 
+    this.rule = 'b3s1234';
+
     this.setOrigin(0);
     this.setInteractive();
     this.on('pointerdown', function () { this.toggle_state(); });
@@ -41,6 +62,10 @@ class Cell extends Phaser.GameObjects.Rectangle
 //    this.set_dead();
 
     world.scene.add.existing(this);
+  }
+
+  set_rule(rule) {
+    this.rule = rule;
   }
 
   set_dead() {
@@ -71,26 +96,13 @@ class Cell extends Phaser.GameObjects.Rectangle
     this.neighbors = neighbors;
   }
 
-  compute_next_state() {
-    compute_next_state_b3s1234();  
-  }
-
-  compute_next_state_b3s2() {
+  compute_next_state(rule) {
     let sum = 0;
     this.neighbors.forEach(n => { if (n.is_alive()) sum += 1; });
-    this.next_state = (sum == 3 || (sum == 2 && this.is_alive())) ? State.alive : State.dead;
-  }
-
-  compute_next_state_b3s1234() {
-    let sum = 0;
-    this.neighbors.forEach(n => { if (n.is_alive()) sum += 1; });
-    this.next_state = (sum == 3 || (this.is_alive() && sum >= 1 && sum <= 4) ? State.alive : State.dead;
-  }
-
-  compute_next_state_b3s12345() {
-    let sum = 0;
-    this.neighbors.forEach(n => { if (n.is_alive()) sum += 1; });
-    this.next_state = (sum == 3 || (this.is_alive() && sum >= 1 && sum <= 5) ? State.alive : State.dead;
+    if (!this.is_alive())
+      this.next_state = rule.b.includes(sum) ? State.alive : State.dead;
+    else
+      this.next_state = rule.s.includes(sum) ? State.alive : State.dead;
   }
 
   update_state() {
@@ -103,7 +115,8 @@ class Cell extends Phaser.GameObjects.Rectangle
 
 class World extends Phaser.GameObjects.Container
 {
-  constructor (scene, world_min_x, world_min_y, world_max_width, world_max_height) {
+  constructor (scene, world_min_x, world_min_y, world_max_width, world_max_height,
+               rule = Rules.b3s23) {
     const Nx = Math.floor(world_max_width / config.cell.size);
     const Ny = Math.floor(world_max_height / config.cell.size);
 
@@ -115,6 +128,8 @@ class World extends Phaser.GameObjects.Container
 
     super(scene, world_x, world_y);
 
+    this.rule = rule;
+    
     this.Nx = Nx;
     this.Ny = Ny;
 
@@ -159,7 +174,7 @@ class World extends Phaser.GameObjects.Container
   }
 
   update_cells() {
-    this.cells.forEach(row => row.forEach(cell => cell.compute_next_state()));
+    this.cells.forEach(row => row.forEach(cell => cell.compute_next_state(this.rule)));
     this.cells.forEach(row => row.forEach(cell => cell.update_state()));
   }
 
@@ -173,6 +188,10 @@ class World extends Phaser.GameObjects.Container
       }
     }
     return population;
+  }
+
+  set_rule(rule) {
+    this.rule = rule;
   }
 }
 
@@ -200,6 +219,8 @@ class Game extends Phaser.Scene
         { font: '14px Arial Black', fill: '#ffffff' });
     this.pause_text = this.add.text(610, 10, 'PAUSED',
         { font: '14px Arial Black', fill: '#ffffff', backgroundColor: '#ff0000' }).setVisible(false);
+    this.rule_text = this.add.text(810, 10, 'Rule: ' + config.rule.name,
+        { font: '14px Arial Black', fill: '#ffffff', backgroundColor: '#ff0000' }).setVisible(false);
 
     const world_min_x = config.border.min;
     const world_min_y = config.border.menu + config.border.min;
@@ -213,10 +234,21 @@ class Game extends Phaser.Scene
     this.input.keyboard.on('keydown-C', function(event) { this.clear(); }, this);
     this.input.keyboard.on('keydown-R', function(event) { this.randomize(); }, this);
 
+    this.input.keyboard.on('keydown-1', function(event) { this.set_rule(Rules.b3s23); }, this);
+    this.input.keyboard.on('keydown-2', function(event) { this.set_rule(Rules.b3s1234); }, this);
+    this.input.keyboard.on('keydown-3', function(event) { this.set_rule(Rules.b3s12345); }, this);
+
     // Initialize cells
     this.world = new World(this, world_min_x, world_min_y, world_max_width, world_max_height);
     this.randomize();
     this.start();
+  }
+
+  set_rule(rule) {
+    if (!Rules.includes(rule))
+      return;
+    this.rule_text.setText('Rule: ' + rule.name);
+    this.world.set_rule(rule);
   }
 
   clear() {
