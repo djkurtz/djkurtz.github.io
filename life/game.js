@@ -293,11 +293,11 @@ class Game extends Phaser.Scene
   }
 
   live_chance_inc () {
-    this.live_chance = Math.max(this.live_chance + 0.1, 1);
+    this.live_chance = Math.min(this.live_chance + 0.1, 1);
   }
 
   live_chance_dec () {
-    this.live_chance = Math.min(0, this.live_chance - 0.1);
+    this.live_chance = Math.max(0, this.live_chance - 0.1);
   }
 
   update ( time, delta ) {
