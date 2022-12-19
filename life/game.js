@@ -239,8 +239,6 @@ class Game extends Phaser.Scene
   }
 
   set_rule(rule) {
-    if (!Rules.includes(rule))
-      return;
     this.rule_text.setText('Rule: ' + rule.name);
     this.world.set_rule(rule);
   }
