@@ -211,10 +211,10 @@ class Game extends Phaser.Scene
         { font: '14px Arial Black', fill: '#ffffff' });
     this.population_text = this.add.text(410, 10, 'Population: 0',
         { font: '14px Arial Black', fill: '#ffffff' });
-    this.pause_text = this.add.text(610, 10, 'PAUSED',
+    this.rule_text = this.add.text(610, 10, 'Rule: ' + config.rule.name,
+        { font: '14px Arial Black', fill: '#ffffff' });
+    this.pause_text = this.add.text(810, 10, 'PAUSED',
         { font: '14px Arial Black', fill: '#ffffff', backgroundColor: '#ff0000' }).setVisible(false);
-    this.rule_text = this.add.text(810, 10, 'Rule: ' + config.rule.name,
-        { font: '14px Arial Black', fill: '#ffffff', backgroundColor: '#ff0000' });
 
     const world_min_x = config.border.min;
     const world_min_y = config.border.menu + config.border.min;
