@@ -223,6 +223,8 @@ class Game extends Phaser.Scene
 
     this.input.keyboard.on('keydown-UP', function(event) { this.interval_dec(); }, this);
     this.input.keyboard.on('keydown-DOWN', function(event) { this.interval_inc(); }, this);
+    this.input.keyboard.on('keydown-RIGHT', function(event) { this.live_chance_inc(); }, this);
+    this.input.keyboard.on('keydown-LEFT', function(event) { this.live_chance_dec(); }, this);
 
     this.input.keyboard.on('keydown-S', function(event) { this.toggle(); }, this);
     this.input.keyboard.on('keydown-C', function(event) { this.clear(); }, this);
@@ -288,6 +290,14 @@ class Game extends Phaser.Scene
 
   interval_dec () {
     this.interval_set(this.interval_idx - 1);
+  }
+
+  live_chance_inc () {
+    this.live_chance = Math.max(this.live_chance + 0.1, 1);
+  }
+
+  live_chance_dec () {
+    this.live_chance = Math.min(0, this.live_chance - 0.1);
   }
 
   update ( time, delta ) {
