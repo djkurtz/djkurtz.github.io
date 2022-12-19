@@ -51,8 +51,6 @@ class Cell extends Phaser.GameObjects.Rectangle
     this.world = world;
     this.neighbors;
 
-    this.rule = 'b3s1234';
-
     this.setOrigin(0);
     this.setInteractive();
     this.on('pointerdown', function () { this.toggle_state(); });
@@ -62,10 +60,6 @@ class Cell extends Phaser.GameObjects.Rectangle
 //    this.set_dead();
 
     world.scene.add.existing(this);
-  }
-
-  set_rule(rule) {
-    this.rule = rule;
   }
 
   set_dead() {
