@@ -115,6 +115,7 @@ class Guy extends Phaser.GameObjects.Sprite
 
     this.setOrigin(0);
     this.setDisplaySize(size, size);
+    this.setDepth(1);
     //this.setInteractive();
     //this.on('pointerdown', function () { this.toggle_state(); });
 
@@ -124,6 +125,41 @@ class Guy extends Phaser.GameObjects.Sprite
   set_pos(x, y) {
     this.coord = { x: x, y: y };
     this.setPosition(x * this.size, y * this.size);
+  }
+
+  set_random(Nx, Ny) {
+    const x = Math.round(Math.random() * (Nx - 1));
+    const y = Math.round(Math.random() * (Ny - 1));
+    this.set_pos(x, y);
+  }
+}
+
+class Door extends Phaser.GameObjects.Sprite
+{
+  constructor (world, x, y, size) {
+    super(world.scene, x * size, y * size, 'door');
+
+    this.world = world;
+    this.size = size;
+    this.coord = { x: x, y: y };
+
+    this.setOrigin(0);
+    this.setDisplaySize(size, size);
+    //this.setInteractive();
+    //this.on('pointerdown', function () { this.toggle_state(); });
+
+    world.scene.add.existing(this);
+  }
+
+  set_pos(x, y) {
+    this.coord = { x: x, y: y };
+    this.setPosition(x * this.size, y * this.size);
+  }
+
+  set_random(Nx, Ny) {
+    const x = Math.round(Math.random() * (Nx - 1));
+    const y = Math.round(Math.random() * (Ny - 1));
+    this.set_pos(x, y);
   }
 }
 
@@ -144,6 +180,9 @@ class World extends Phaser.GameObjects.Container
     this.Nx = Nx;
     this.Ny = Ny;
 
+    this.pause = true;
+    this.level = 1;
+
     // Initialize cells
     this.cells = new Array(this.Ny);
     for (let y = 0; y < this.Ny; y++) {
@@ -154,6 +193,9 @@ class World extends Phaser.GameObjects.Container
       }
     }
 
+    this.door = new Door(this, 1, 1, config.cell.size);
+    this.add(this.door);
+
     this.guy = new Guy(this, 0, 0, config.cell.size);
     this.add(this.guy);
 
@@ -161,7 +203,12 @@ class World extends Phaser.GameObjects.Container
   }
 
   clear() {
-    this.cells.forEach(row => row.forEach(cell => { cell.set_state(states[0]); cell.visited = false; }));
+    this.pause = true;
+    this.cells.forEach(row => row.forEach(cell => {
+        cell.set_state(states[0]);
+        cell.visited = false;
+        cell.tint = 0xffffff;
+    }));
   }
 
   randomize() {
@@ -199,6 +246,14 @@ class World extends Phaser.GameObjects.Container
       stack.push(c);
       stack.push(n);
     }
+
+    this.door.set_random(this.Nx, this.Ny);
+//  this.guy.set_random(this.Nx, this.Ny);
+//    this.door.set_pos(0, 0);
+//    this.guy.set_pos(1, 1);
+    this.guy.setVisible(true);
+
+    this.pause = false;
   }
 
   guy_north() {
@@ -224,6 +279,22 @@ class World extends Phaser.GameObjects.Container
     if (this.cells[p.y][p.x].east())
       this.guy.set_pos(p.x + 1, p.y);
   }
+
+  update() {
+    this.cells[this.guy.coord.y][this.guy.coord.x].tint = 0xcccccc;
+    if (this.guy.coord.x === this.door.coord.x && this.guy.coord.y === this.door.coord.y) {
+      this.pause = true;
+      this.door.play("door_open").once('animationcomplete', () => {
+          this.level += 1;
+          this.guy.setVisible(false);
+          this.door.playReverse("door_open").once('animationcomplete', () => {
+              this.randomize();
+              this.pause = false;
+          });
+      }, this);
+
+    }
+  }
 }
 
 class Game extends Phaser.Scene
@@ -232,12 +303,14 @@ class Game extends Phaser.Scene
     super('game');
 
     this.cells;
+    this.level = 1;
   }
 
   preload () {
     this.load.setPath('assets/img/');
     this.load.image('guy', 'guy.png');
     this.load.spritesheet('walls', 'walls.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('door', 'door.png', { frameWidth: 32, frameHeight: 32 });
   }
 
   create () {
@@ -254,6 +327,12 @@ class Game extends Phaser.Scene
     // Initialize cells
     this.world = new World(this, world_min_x, world_min_y, world_max_width, world_max_height);
     this.world.randomize();
+
+    const doorOpenAnimation = this.anims.create({
+      key: 'door_open',
+      frames: this.anims.generateFrameNumbers('door'),
+      frameRate: 6,
+    });
   }
 
   clear() {
@@ -265,6 +344,14 @@ class Game extends Phaser.Scene
   }
 
   update ( time, delta ) {
+    if (this.world.pause)
+      return;
+
+    this.world.update();
+
+    this.level_text = this.add.text(10, 10, 'Level: ' + this.world.level,
+      { font: '20px Arial', fill: '#ffffff' });
+
     if (this.input.keyboard.checkDown(this.cursors.left, 250)) {
       this.world.guy_west();
     }
