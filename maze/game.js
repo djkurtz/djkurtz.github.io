@@ -303,7 +303,6 @@ class Game extends Phaser.Scene
     super('game');
 
     this.cells;
-    this.level = 1;
   }
 
   preload () {
@@ -333,6 +332,9 @@ class Game extends Phaser.Scene
       frames: this.anims.generateFrameNumbers('door'),
       frameRate: 6,
     });
+
+    this.level_text = this.add.text(10, 10, 'Level: ' + this.world.level,
+      { font: '20px Arial', fill: '#ffffff' });
   }
 
   clear() {
@@ -349,8 +351,7 @@ class Game extends Phaser.Scene
 
     this.world.update();
 
-    this.level_text = this.add.text(10, 10, 'Level: ' + this.world.level,
-      { font: '20px Arial', fill: '#ffffff' });
+    this.level_text.setText('Level: ' + this.world.level);
 
     if (this.input.keyboard.checkDown(this.cursors.left, 250)) {
       this.world.guy_west();
