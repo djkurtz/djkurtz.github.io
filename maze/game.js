@@ -127,9 +127,9 @@ class Guy extends Phaser.GameObjects.Sprite
     this.setPosition(x * this.size, y * this.size);
   }
 
-  set_random(Nx, Ny) {
-    const x = Math.round(Math.random() * (Nx - 1));
-    const y = Math.round(Math.random() * (Ny - 1));
+  set_random() {
+    const x = Math.round(Math.random() * (this.world.Nx - 1));
+    const y = Math.round(Math.random() * (this.world.Ny - 1));
     this.set_pos(x, y);
   }
 }
@@ -157,10 +157,58 @@ class Door extends Phaser.GameObjects.Sprite
   }
 
   set_random(Nx, Ny) {
-    const x = Math.round(Math.random() * (Nx - 1));
-    const y = Math.round(Math.random() * (Ny - 1));
+    const x = Math.round(Math.random() * (this.world.Nx - 1));
+    const y = Math.round(Math.random() * (this.world.Ny - 1));
     this.set_pos(x, y);
   }
+}
+
+class Key extends Phaser.GameObjects.Sprite
+{
+  constructor (world, x, y, size) {
+    super(world.scene, x * size, y * size, 'key');
+
+    this.world = world;
+    this.size = size;
+    this.coord = { x: x, y: y };
+
+    this.taken = false;
+
+    this.setOrigin(0);
+    this.setDisplaySize(size, size);
+
+    world.scene.add.existing(this);
+  }
+
+  set_pos(x, y) {
+    this.coord = { x: x, y: y };
+    this.setPosition(x * this.size, y * this.size);
+  }
+
+  set_random() {
+    const x = Math.round(Math.random() * (this.world.Nx - 1));
+    const y = Math.round(Math.random() * (this.world.Ny - 1));
+    this.set_pos(x, y);
+  }
+
+  take() {
+    this.setVisible(false);
+    this.taken = true;
+  }
+
+  is_taken() {
+    return this.taken;
+  }
+
+  reset() {
+    this.set_random();
+    this.setVisible(true);
+    this.taken = false;
+  }
+}
+
+function same_coord(a, b) {
+  return (a.coord.x === b.coord.x && a.coord.y === b.coord.y);
 }
 
 class World extends Phaser.GameObjects.Container
@@ -197,7 +245,12 @@ class World extends Phaser.GameObjects.Container
     this.add(this.door);
 
     this.guy = new Guy(this, 0, 0, config.cell.size);
+    if (same_coord(this.door, this.guy))
+      this.guy.set_random();
     this.add(this.guy);
+
+    this.key = new Key(this, 0, 0, config.cell.size);
+    this.add(this.key);
 
     scene.add.existing(this);
   }
@@ -247,11 +300,15 @@ class World extends Phaser.GameObjects.Container
       stack.push(n);
     }
 
-    this.door.set_random(this.Nx, this.Ny);
-//  this.guy.set_random(this.Nx, this.Ny);
+    this.door.set_random();
+//  this.guy.set_random();
 //    this.door.set_pos(0, 0);
 //    this.guy.set_pos(1, 1);
     this.guy.setVisible(true);
+
+    this.key.reset();
+    if (same_coord(this.door, this.key) || same_coord(this.guy, this.key))
+      this.key.set_random();
 
     this.pause = false;
   }
@@ -282,7 +339,12 @@ class World extends Phaser.GameObjects.Container
 
   update() {
     this.cells[this.guy.coord.y][this.guy.coord.x].tint = 0xcccccc;
-    if (this.guy.coord.x === this.door.coord.x && this.guy.coord.y === this.door.coord.y) {
+
+    if (same_coord(this.guy, this.key) && !this.key.is_taken()) {
+      this.key.take();
+    }
+
+    if (same_coord(this.guy, this.door) && this.key.is_taken()) {
       this.pause = true;
       this.door.play("door_open").once('animationcomplete', () => {
           this.level += 1;
@@ -308,6 +370,7 @@ class Game extends Phaser.Scene
   preload () {
     this.load.setPath('assets/img/');
     this.load.image('guy', 'guy.png');
+    this.load.image('key', 'key.png');
     this.load.spritesheet('walls', 'walls.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('door', 'door.png', { frameWidth: 32, frameHeight: 32 });
   }
@@ -353,19 +416,19 @@ class Game extends Phaser.Scene
 
     this.level_text.setText('Level: ' + this.world.level);
 
-    if (this.input.keyboard.checkDown(this.cursors.left, 250)) {
+    if (this.input.keyboard.checkDown(this.cursors.left, 200)) {
       this.world.guy_west();
     }
 
-    if (this.input.keyboard.checkDown(this.cursors.right, 250)) {
+    if (this.input.keyboard.checkDown(this.cursors.right, 200)) {
       this.world.guy_east();
     }
 
-    if (this.input.keyboard.checkDown(this.cursors.up, 250)) {
+    if (this.input.keyboard.checkDown(this.cursors.up, 200)) {
       this.world.guy_north();
     }
 
-    if (this.input.keyboard.checkDown(this.cursors.down, 250)) {
+    if (this.input.keyboard.checkDown(this.cursors.down, 200)) {
       this.world.guy_south();
     }
   }
