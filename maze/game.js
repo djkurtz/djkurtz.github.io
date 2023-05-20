@@ -55,10 +55,13 @@ class Cell extends Phaser.GameObjects.Sprite
     this.coord = { x: x, y: y };
     this.state = states[0];
 
+    this.visible = false;
     this.visited = false;
 
     this.setOrigin(0);
     this.setDisplaySize(size, size);
+    this.setVisible(this.visible);
+
     //this.setInteractive();
     //this.on('pointerdown', function () { this.toggle_state(); });
 
@@ -118,6 +121,8 @@ class Guy extends Phaser.GameObjects.Sprite
     this.setDepth(1);
     //this.setInteractive();
     //this.on('pointerdown', function () { this.toggle_state(); });
+
+    this.inventory = new Array();
 
     world.scene.add.existing(this);
   }
@@ -207,6 +212,51 @@ class Key extends Phaser.GameObjects.Sprite
   }
 }
 
+class WorldMap extends Phaser.GameObjects.Sprite
+{
+  constructor (world, x, y, size) {
+    super(world.scene, x * size, y * size, 'map');
+
+    this.world = world;
+    this.size = size;
+    this.coord = { x: x, y: y };
+
+    this.taken = false;
+
+    this.setOrigin(0);
+    this.setDisplaySize(size, size);
+
+    world.scene.add.existing(this);
+  }
+
+  set_pos(x, y) {
+    this.coord = { x: x, y: y };
+    this.setPosition(x * this.size, y * this.size);
+  }
+
+  set_random() {
+    const x = Math.round(Math.random() * (this.world.Nx - 1));
+    const y = Math.round(Math.random() * (this.world.Ny - 1));
+    this.set_pos(x, y);
+  }
+
+  take() {
+    this.setVisible(false);
+    this.taken = true;
+  }
+
+  is_taken() {
+    this.world.show_all();
+    return this.taken;
+  }
+
+  reset() {
+    this.set_random();
+    this.setVisible(true);
+    this.taken = false;
+  }
+}
+
 function same_coord(a, b) {
   return (a.coord.x === b.coord.x && a.coord.y === b.coord.y);
 }
@@ -252,9 +302,13 @@ class World extends Phaser.GameObjects.Container
     this.key = new Key(this, 0, 0, config.cell.size);
     this.add(this.key);
 
+    this.map = new WorldMap(this, 0, 0, config.cell.size);
+    this.add(this.map);
+
     scene.add.existing(this);
   }
 
+  
   clear() {
     this.pause = true;
     this.cells.forEach(row => row.forEach(cell => {
@@ -300,41 +354,72 @@ class World extends Phaser.GameObjects.Container
       stack.push(n);
     }
 
-    this.door.set_random();
-//  this.guy.set_random();
-//    this.door.set_pos(0, 0);
-//    this.guy.set_pos(1, 1);
+    this.guy.set_random();
+    this.guy_visit(this.guy.coord.x, this.guy.coord.y);
     this.guy.setVisible(true);
+
+    this.door.set_random();
+    if (same_coord(this.door, this.guy))
+      this.door.set_random();
 
     this.key.reset();
     if (same_coord(this.door, this.key) || same_coord(this.guy, this.key))
       this.key.set_random();
 
+    this.map.reset();
+    if (same_coord(this.door, this.map) || same_coord(this.guy, this.map) || same_coord(this.key, this.map))
+      this.map.set_random();
+
     this.pause = false;
+  }
+
+  show_all() {
+    for (let y = 0; y < this.Ny; y++) {
+      for (let x = 0; x < this.Nx; x++) {
+        this.cells[y][x].setVisible(true);
+      }
+    }
+  }
+
+  guy_visit(x, y) {
+    this.cells[y][x].setVisible(true);
+    this.guy.set_pos(x, y);
+
+    if (this.cells[y][x].north())
+      this.cells[y - 1][x].setVisible(true);
+
+    if (this.cells[y][x].south())
+      this.cells[y + 1][x].setVisible(true);
+
+    if (this.cells[y][x].east())
+      this.cells[y][x + 1].setVisible(true);
+
+    if (this.cells[y][x].west())
+      this.cells[y][x - 1].setVisible(true);
   }
 
   guy_north() {
     let p = this.guy.coord;
     if (this.cells[p.y][p.x].north())
-      this.guy.set_pos(p.x, p.y - 1);
+      this.guy_visit(p.x, p.y - 1);
   }
 
   guy_south() {
     let p = this.guy.coord;
     if (this.cells[p.y][p.x].south())
-      this.guy.set_pos(p.x, p.y + 1);
+      this.guy_visit(p.x, p.y + 1);
   }
 
   guy_west() {
     let p = this.guy.coord;
     if (this.cells[p.y][p.x].west())
-      this.guy.set_pos(p.x - 1, p.y);
+      this.guy_visit(p.x - 1, p.y);
   }
 
   guy_east() {
     let p = this.guy.coord;
     if (this.cells[p.y][p.x].east())
-      this.guy.set_pos(p.x + 1, p.y);
+      this.guy_visit(p.x + 1, p.y);
   }
 
   update() {
@@ -342,6 +427,10 @@ class World extends Phaser.GameObjects.Container
 
     if (same_coord(this.guy, this.key) && !this.key.is_taken()) {
       this.key.take();
+    }
+
+    if (same_coord(this.guy, this.map) && !this.map.is_taken()) {
+      this.map.take();
     }
 
     if (same_coord(this.guy, this.door) && this.key.is_taken()) {
