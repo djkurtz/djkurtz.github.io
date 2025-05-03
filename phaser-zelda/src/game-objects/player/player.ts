@@ -1,50 +1,72 @@
-import { PLAYER_ANIMATION_KEYS } from "../../common/assets";
+import { ASSET_KEYS, PLAYER_ANIMATION_KEYS } from "../../common/assets";
+import { PLAYER_HURT_PUSHBACK_SPEED, PLAYER_INVULNERABLE_AFTER_HIT_DURATION, PLAYER_SPEED } from "../../common/config";
+import { flash } from "../../common/juice-utils";
 import { Position } from "../../common/types";
+import { AnimationConfig } from "../../components/game-object/animation-component";
 import { InputComponent } from "../../components/input/input-component";
+import { CHARACTER_STATES } from "../../components/state-macine/states/character/character-states";
+import { HurtState } from "../../components/state-macine/states/character/hurt-state";
+import { IdleState } from "../../components/state-macine/states/character/idle-state";
+import { MoveState } from "../../components/state-macine/states/character/move-state";
+import { CharacterGameObject } from "../common/game-object";
 
 export type PlayerConfig = {
-    scene: Phaser.Scene;
-    position: Position;
-    assetKey: string;
-    frame?: number;
-    controls: InputComponent;
+	scene: Phaser.Scene;
+	position: Position;
+	controls: InputComponent;
 }
 
-export class Player extends Phaser.Physics.Arcade.Sprite {
-    #controls: InputComponent;
+export class Player extends CharacterGameObject {
+	constructor(config: PlayerConfig) {
+		// create animation config for component
+		const animationConfig: AnimationConfig = {
+			WALK_DOWN: { key: PLAYER_ANIMATION_KEYS.WALK_DOWN, repeat: -1, ignoreIfPlaying: true },
+			WALK_UP: { key: PLAYER_ANIMATION_KEYS.WALK_UP, repeat: -1, ignoreIfPlaying: true },
+			WALK_LEFT: { key: PLAYER_ANIMATION_KEYS.WALK_SIDE, repeat: -1, ignoreIfPlaying: true },
+			WALK_RIGHT: { key: PLAYER_ANIMATION_KEYS.WALK_SIDE, repeat: -1, ignoreIfPlaying: true },
+			IDLE_DOWN: { key: PLAYER_ANIMATION_KEYS.IDLE_DOWN, repeat: -1, ignoreIfPlaying: true },
+			IDLE_UP: { key: PLAYER_ANIMATION_KEYS.IDLE_UP, repeat: -1, ignoreIfPlaying: true },
+			IDLE_LEFT: { key: PLAYER_ANIMATION_KEYS.IDLE_SIDE, repeat: -1, ignoreIfPlaying: true },
+			IDLE_RIGHT: { key: PLAYER_ANIMATION_KEYS.IDLE_SIDE, repeat: -1, ignoreIfPlaying: true },
+			HURT_DOWN: { key: PLAYER_ANIMATION_KEYS.HURT_DOWN, repeat: 0, ignoreIfPlaying: true },
+			HURT_UP: { key: PLAYER_ANIMATION_KEYS.HURT_UP, repeat: 0, ignoreIfPlaying: true },
+			HURT_LEFT: { key: PLAYER_ANIMATION_KEYS.HURT_SIDE, repeat: 0, ignoreIfPlaying: true },
+			HURT_RIGHT: { key: PLAYER_ANIMATION_KEYS.HURT_SIDE, repeat: 0, ignoreIfPlaying: true },
+		}
 
-    constructor(config: PlayerConfig) {
-        const {scene, position, assetKey, frame} = config;
-        const {x, y} = position;
-        super(scene, x, y, assetKey, frame || 0);
+		super({
+			scene: config.scene,
+			position: config.position,
+			assetKey: ASSET_KEYS.PLAYER,
+			frame: 0,
+			id: 'player',
+			isPlayer: true,
+			animationConfig,
+			speed: PLAYER_SPEED,
+			inputComponent: config.controls,
+			isInvulnerable: false,
+			invulnerableAfterHitAnimationDuration: PLAYER_INVULNERABLE_AFTER_HIT_DURATION,
+		});
 
-        // add object to scenen and enable phaser physics
-        scene.add.existing(this);
-        scene.physics.add.existing(this);
+		// add state machine
+		this._stateMachine.addState(new IdleState(this));
+		this._stateMachine.addState(new MoveState(this));
+		this._stateMachine.addState(
+			new HurtState(this, PLAYER_HURT_PUSHBACK_SPEED, () => {
+				flash(this);
+			})
+		);
+		this._stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
 
-        this.#controls = config.controls;
+		config.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
+		config.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			config.scene.events.off(Phaser.Scenes.Events.UPDATE, this.update, this);
+		});
 
-        this.play({key: PLAYER_ANIMATION_KEYS.IDLE_DOWN, repeat: -1 });
+		this.physicsBody.setSize(12, 16, true).setOffset(this.width / 2 - 5, this.height / 2);
+	}
 
-        config.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
-        config.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-            config.scene.events.off(Phaser.Scenes.Events.UPDATE, this.update, this);
-        });
-    }
-
-    update(): void {
-        if (this.#controls.isUpDown) {
-            this.play({ key: PLAYER_ANIMATION_KEYS.IDLE_UP, repeat: -1 }, true);
-        } else if (this.#controls.isDownDown) {
-            this.play({ key: PLAYER_ANIMATION_KEYS.IDLE_DOWN, repeat: -1 }, true);
-        }
-
-        if (this.#controls.isLeftDown) {
-            this.setFlipX(true);
-            this.play({ key: PLAYER_ANIMATION_KEYS.IDLE_SIDE, repeat: -1 }, true);
-        } else if (this.#controls.isRightDown) {
-            this.setFlipX(false);
-            this.play({ key: PLAYER_ANIMATION_KEYS.IDLE_SIDE, repeat: -1 }, true);
-        }
-    }
+	get physicsBody(): Phaser.Physics.Arcade.Body {
+		return this.body as Phaser.Physics.Arcade.Body;
+	}
 }

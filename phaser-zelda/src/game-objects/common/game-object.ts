@@ -1,0 +1,113 @@
+import { Direction, Position } from "../../common/types";
+import { AnimationComponent, AnimationConfig } from "../../components/game-object/animation-component";
+import { ControlsComponent } from "../../components/game-object/controls-component";
+import { DirectionComponent } from "../../components/game-object/direction-component";
+import { InvulnerableComponent } from "../../components/game-object/invulnerable-component";
+import { SpeedComponent } from "../../components/game-object/speed-component";
+import { InputComponent } from "../../components/input/input-component";
+import { StateMachine } from "../../components/state-macine/state-machine";
+import { CHARACTER_STATES } from "../../components/state-macine/states/character/character-states";
+import { IdleState } from "../../components/state-macine/states/character/idle-state";
+import { MoveState } from "../../components/state-macine/states/character/move-state";
+
+export type CharacterConfig = {
+	scene: Phaser.Scene;
+	position: Position;
+	assetKey: string;
+	frame?: number;
+	inputComponent: InputComponent;
+	animationConfig: AnimationConfig;
+	speed: number;
+	id?: string;
+	isPlayer: boolean;
+	isInvulnerable?: boolean;
+	invulnerableAfterHitAnimationDuration?: number;
+}
+
+export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
+	protected _controlsComponent: ControlsComponent;
+	protected _speedComponent: SpeedComponent;
+	protected _directionComponent: DirectionComponent;
+	protected _animationComponent: AnimationComponent;
+	protected _invulnerableComponent: InvulnerableComponent;
+	protected _stateMachine: StateMachine;
+	protected _isPlayer: boolean;
+
+	constructor(config: CharacterConfig) {
+		const {
+			scene,
+			position,
+			assetKey,
+			frame,
+			speed,
+			animationConfig,
+			inputComponent,
+			id,
+			isPlayer,
+			invulnerableAfterHitAnimationDuration,
+			isInvulnerable,
+		} = config;
+		const { x, y } = position;
+		super(scene, x, y, assetKey, frame || 0);
+
+		// add object to scene and enable phaser physics
+		scene.add.existing(this);
+		scene.physics.add.existing(this);
+
+		this._controlsComponent = new ControlsComponent(this, inputComponent);
+		this._speedComponent = new SpeedComponent(this, speed);
+		this._directionComponent = new DirectionComponent(this);
+		this._animationComponent = new AnimationComponent(this, animationConfig);
+		this._invulnerableComponent = new InvulnerableComponent(
+			this,
+			isInvulnerable || false,
+			invulnerableAfterHitAnimationDuration
+		);
+
+		// add state machine
+		this._stateMachine = new StateMachine(id);
+
+		// general config
+		this._isPlayer = isPlayer;
+	}
+
+	get isEnemy(): boolean {
+		return !this._isPlayer;
+	}
+
+	get controls(): InputComponent {
+		return this._controlsComponent.controls;
+	}
+
+	get speed(): number {
+		return this._speedComponent.speed;
+	}
+
+	get direction(): Direction {
+		return this._directionComponent.direction;
+	}
+
+	set direction(value: Direction) {
+		this._directionComponent.direction = value;
+	}
+
+	get animationComponent(): AnimationComponent {
+		return this._animationComponent;
+	}
+
+	get invulnerableComponent(): InvulnerableComponent {
+		return this._invulnerableComponent;
+	}
+
+	public update(): void {
+		this._stateMachine.update();
+	}
+
+	public hit(direction: Direction): void {
+		if (this._invulnerableComponent.invulnerable) {
+			return;
+		}
+
+		this._stateMachine.setState(CHARACTER_STATES.HURT_STATE, direction);
+	}
+}
