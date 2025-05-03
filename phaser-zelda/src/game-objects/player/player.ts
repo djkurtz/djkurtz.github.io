@@ -1,8 +1,9 @@
 import { ASSET_KEYS, PLAYER_ANIMATION_KEYS } from "../../common/assets";
 import { PLAYER_HURT_PUSHBACK_SPEED, PLAYER_INVULNERABLE_AFTER_HIT_DURATION, PLAYER_SPEED, PLAYER_START_MAX_LIFE } from "../../common/config";
 import { flash } from "../../common/juice-utils";
-import { Position } from "../../common/types";
+import { GameObject, Position } from "../../common/types";
 import { AnimationConfig } from "../../components/game-object/animation-component";
+import { CollidingObjectsComponent } from "../../components/game-object/colliding-objects-component";
 import { InputComponent } from "../../components/input/input-component";
 import { CHARACTER_STATES } from "../../components/state-macine/states/character/character-states";
 import { DeathState } from "../../components/state-macine/states/character/death-state";
@@ -20,6 +21,8 @@ export type PlayerConfig = {
 }
 
 export class Player extends CharacterGameObject {
+	#collidingObjectsComponent: CollidingObjectsComponent;
+
 	constructor(config: PlayerConfig) {
 		// create animation config for component
 		const animationConfig: AnimationConfig = {
@@ -57,6 +60,10 @@ export class Player extends CharacterGameObject {
 			currentLife: config.currentLife,
 		});
 
+
+		// add components
+		this.#collidingObjectsComponent = new CollidingObjectsComponent(this);
+
 		// add state machine
 		this._stateMachine.addState(new IdleState(this));
 		this._stateMachine.addState(new MoveState(this));
@@ -78,5 +85,15 @@ export class Player extends CharacterGameObject {
 
 	get physicsBody(): Phaser.Physics.Arcade.Body {
 		return this.body as Phaser.Physics.Arcade.Body;
+	}
+
+	public collidedWithGameObject(gameObject: GameObject): void {
+		this.#collidingObjectsComponent.add(gameObject);
+	}
+
+	public update(): void {
+		super.update();
+		console.log(this.#collidingObjectsComponent.objects);
+		this.#collidingObjectsComponent.reset();
 	}
 }

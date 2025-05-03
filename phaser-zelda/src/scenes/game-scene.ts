@@ -10,6 +10,7 @@ import { CHEST_STATE, DIRECTION } from '../common/common';
 import { PLAYER_START_MAX_LIFE } from '../common/config';
 import { Pot } from '../game-objects/objects/pot';
 import { Chest } from '../game-objects/objects/chest';
+import { GameObject } from '../common/types';
 
 export class GameScene extends Phaser.Scene {
   #controls!: KeyboardComponent;
@@ -59,18 +60,18 @@ export class GameScene extends Phaser.Scene {
     this.#blockingGroup = this.add.group([
       new Pot({
         scene: this,
-        position: { x: this.scale.width / 2 + 90, y: this.scale.height / 2},
+        position: { x: this.scale.width / 2 + 90, y: this.scale.height / 2 },
       }),
       new Chest({
         scene: this,
-        position: { x: this.scale.width / 2 - 90, y: this.scale.height / 2},
+        position: { x: this.scale.width / 2 - 90, y: this.scale.height / 2 },
         requiresBossKey: false,
       }),
       new Chest({
         scene: this,
         position: { x: this.scale.width / 2 - 90, y: this.scale.height / 2 - 80 },
         requiresBossKey: true,
-      }), 
+      }),
     ]);
 
     this.#registerColliders();
@@ -89,7 +90,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.physics.add.collider(this.#player, this.#blockingGroup, (player, gameObject) => {
-
+      this.#player.collidedWithGameObject(gameObject as GameObject);
     });
 
     this.physics.add.collider(this.#enemyGroup, this.#blockingGroup, (enemy, gameObject) => {

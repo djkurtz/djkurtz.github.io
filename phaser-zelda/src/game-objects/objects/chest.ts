@@ -1,21 +1,22 @@
 import { ASSET_KEYS, CHEST_FRAME_KEYS } from "../../common/assets";
-import { CHEST_STATE } from "../../common/common";
+import { CHEST_STATE, INTERACTIVE_OBJECT_TYPE } from "../../common/common";
 import { ChestState, Position } from "../../common/types";
+import { InteractiveObjectComponent } from "../../components/game-object/interactive-object-component";
 
 type ChestConfig = {
 	scene: Phaser.Scene;
 	position: Position;
-    requiresBossKey: boolean;
-    chestState?: ChestState;
+	requiresBossKey: boolean;
+	chestState?: ChestState;
 }
 
 export class Chest extends Phaser.Physics.Arcade.Image {
 	#state: ChestState;
-    #isBossKeyChest: boolean;
+	#isBossKeyChest: boolean;
 
 	constructor(config: ChestConfig) {
 		const { scene, position } = config;
-        const frameKey = config.requiresBossKey ? CHEST_FRAME_KEYS.BIG_CHEST_CLOSED : CHEST_FRAME_KEYS.SMALL_CHEST_CLOSED;
+		const frameKey = config.requiresBossKey ? CHEST_FRAME_KEYS.BIG_CHEST_CLOSED : CHEST_FRAME_KEYS.SMALL_CHEST_CLOSED;
 		super(scene, position.x, position.y, ASSET_KEYS.DUNGEON_OBJECTS, frameKey);
 
 		scene.add.existing(this);
@@ -23,20 +24,23 @@ export class Chest extends Phaser.Physics.Arcade.Image {
 		this.setOrigin(0.1).setImmovable(true);
 
 		this.#state = config.chestState || CHEST_STATE.HIDDEN;
-        this.#isBossKeyChest = config.requiresBossKey;
+		this.#isBossKeyChest = config.requiresBossKey;
 
-        if (this.#isBossKeyChest) {
-            (this.body as Phaser.Physics.Arcade.Body).setSize(32, 24).setOffset(0, 8);
-        }
+		if (this.#isBossKeyChest) {
+			(this.body as Phaser.Physics.Arcade.Body).setSize(32, 24).setOffset(0, 8);
+		}
+
+		// add components
+		new InteractiveObjectComponent(this, INTERACTIVE_OBJECT_TYPE.OPEN);
 	}
-    
-    public open(): void {
-        if (this.#state !== CHEST_STATE.REVEALED) {
-            return;
-        }
 
-        this.#state = CHEST_STATE.OPEN;
-        const frameKey = this.#isBossKeyChest ? CHEST_FRAME_KEYS.BIG_CHEST_OPEN : CHEST_FRAME_KEYS.SMALL_CHEST_OPEN;
-        this.setFrame(frameKey);
-    }
+	public open(): void {
+		if (this.#state !== CHEST_STATE.REVEALED) {
+			return;
+		}
+
+		this.#state = CHEST_STATE.OPEN;
+		const frameKey = this.#isBossKeyChest ? CHEST_FRAME_KEYS.BIG_CHEST_OPEN : CHEST_FRAME_KEYS.SMALL_CHEST_OPEN;
+		this.setFrame(frameKey);
+	}
 }
