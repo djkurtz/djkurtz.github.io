@@ -6,6 +6,7 @@ export class BaseCharacterState implements State {
     protected _stateMachine!: StateMachine;
     #name: string;
 
+
     constructor(name: string, gameObject: CharacterGameObject) {
         this.#name = name;
         this._gameObject = gameObject;

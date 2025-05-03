@@ -1,10 +1,11 @@
 import { ASSET_KEYS, PLAYER_ANIMATION_KEYS } from "../../common/assets";
-import { PLAYER_HURT_PUSHBACK_SPEED, PLAYER_INVULNERABLE_AFTER_HIT_DURATION, PLAYER_SPEED } from "../../common/config";
+import { PLAYER_HURT_PUSHBACK_SPEED, PLAYER_INVULNERABLE_AFTER_HIT_DURATION, PLAYER_SPEED, PLAYER_START_MAX_LIFE } from "../../common/config";
 import { flash } from "../../common/juice-utils";
 import { Position } from "../../common/types";
 import { AnimationConfig } from "../../components/game-object/animation-component";
 import { InputComponent } from "../../components/input/input-component";
 import { CHARACTER_STATES } from "../../components/state-macine/states/character/character-states";
+import { DeathState } from "../../components/state-macine/states/character/death-state";
 import { HurtState } from "../../components/state-macine/states/character/hurt-state";
 import { IdleState } from "../../components/state-macine/states/character/idle-state";
 import { MoveState } from "../../components/state-macine/states/character/move-state";
@@ -14,6 +15,8 @@ export type PlayerConfig = {
 	scene: Phaser.Scene;
 	position: Position;
 	controls: InputComponent;
+	maxLife: number;
+	currentLife: number;
 }
 
 export class Player extends CharacterGameObject {
@@ -32,6 +35,10 @@ export class Player extends CharacterGameObject {
 			HURT_UP: { key: PLAYER_ANIMATION_KEYS.HURT_UP, repeat: 0, ignoreIfPlaying: true },
 			HURT_LEFT: { key: PLAYER_ANIMATION_KEYS.HURT_SIDE, repeat: 0, ignoreIfPlaying: true },
 			HURT_RIGHT: { key: PLAYER_ANIMATION_KEYS.HURT_SIDE, repeat: 0, ignoreIfPlaying: true },
+			DIE_DOWN: { key: PLAYER_ANIMATION_KEYS.DIE_DOWN, repeat: 0, ignoreIfPlaying: true },
+			DIE_UP: { key: PLAYER_ANIMATION_KEYS.DIE_UP, repeat: 0, ignoreIfPlaying: true },
+			DIE_LEFT: { key: PLAYER_ANIMATION_KEYS.DIE_SIDE, repeat: 0, ignoreIfPlaying: true },
+			DIE_RIGHT: { key: PLAYER_ANIMATION_KEYS.DIE_SIDE, repeat: 0, ignoreIfPlaying: true },
 		}
 
 		super({
@@ -46,6 +53,8 @@ export class Player extends CharacterGameObject {
 			inputComponent: config.controls,
 			isInvulnerable: false,
 			invulnerableAfterHitAnimationDuration: PLAYER_INVULNERABLE_AFTER_HIT_DURATION,
+			maxLife: config.maxLife,
+			currentLife: config.currentLife,
 		});
 
 		// add state machine
@@ -56,6 +65,7 @@ export class Player extends CharacterGameObject {
 				flash(this);
 			})
 		);
+		this._stateMachine.addState(new DeathState(this));
 		this._stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
 
 		config.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
