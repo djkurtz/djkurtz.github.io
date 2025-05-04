@@ -4,6 +4,7 @@ import { flash } from "../../common/juice-utils";
 import { GameObject, Position } from "../../common/types";
 import { AnimationConfig } from "../../components/game-object/animation-component";
 import { CollidingObjectsComponent } from "../../components/game-object/colliding-objects-component";
+import { HeldGameObjectComponent } from "../../components/game-object/held-game-object-component";
 import { InputComponent } from "../../components/input/input-component";
 import { CHARACTER_STATES } from "../../components/state-macine/states/character/character-states";
 import { DeathState } from "../../components/state-macine/states/character/death-state";
@@ -14,6 +15,7 @@ import { LiftState } from "../../components/state-macine/states/character/lift-s
 import { MoveHoldingState } from "../../components/state-macine/states/character/move-holding-state";
 import { MoveState } from "../../components/state-macine/states/character/move-state";
 import { OpenChestState } from "../../components/state-macine/states/character/open-chest-state";
+import { ThrowState } from "../../components/state-macine/states/character/throw-state";
 import { CharacterGameObject } from "../common/game-object";
 
 export type PlayerConfig = {
@@ -79,6 +81,7 @@ export class Player extends CharacterGameObject {
 
 		// add components
 		this.#collidingObjectsComponent = new CollidingObjectsComponent(this);
+		new HeldGameObjectComponent(this);
 
 		// add state machine
 		this._stateMachine.addState(new IdleState(this));
@@ -93,6 +96,7 @@ export class Player extends CharacterGameObject {
 		this._stateMachine.addState(new OpenChestState(this));
 		this._stateMachine.addState(new IdleHoldingState(this));
 		this._stateMachine.addState(new MoveHoldingState(this));
+		this._stateMachine.addState(new ThrowState(this));
 		this._stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
 
 		config.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
