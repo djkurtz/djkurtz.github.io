@@ -17,7 +17,7 @@ export class InteractiveObjectComponent extends BaseGameObjectComponent {
 		return this.#objectType;
 	}
 
-	public ineract(): void {
+	public interact(): void {
 		this.#callback();
 	}
 
