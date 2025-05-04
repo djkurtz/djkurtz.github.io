@@ -13,10 +13,7 @@ export class OpenChestState extends BaseCharacterState {
 	onEnter(args: unknown[]): void {
 		const chest = args[0] as Chest;
 
-		if (isArcadePhysicsBody(this._gameObject.body)) {
-			this._gameObject.body.velocity.x = 0;
-			this._gameObject.body.velocity.y = 0;
-		}
+		this._resetObjectVelocity();
 
 		this._gameObject.animationComponent.playAnimation(`LIFT_${this._gameObject.direction}`, () => {
 			EVENT_BUS.emit(CUSTOM_EVENTS.OPENED_CHEST, chest);

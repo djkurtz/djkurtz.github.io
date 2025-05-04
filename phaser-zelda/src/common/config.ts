@@ -20,3 +20,10 @@ export const ENEMY_WISP_ANIMATION_DURATION = 500;
 export const ENEMY_WISP_START_MAX_LIFE = 1;
 
 export const HURT_PUSH_BACK_DELAY = 200;
+
+export const THROW_ITEM_SPEED = 300;
+export const THROW_ITEM_DELAY_BEFORE_CALLBACK = 200;
+
+export const LIFT_ITEM_ANIMATION_DELAY = 0;
+export const LIFT_ITEM_DURATION = 250;
+export const LIFT_ITEM_ENABLE_DEBUGGING = false;
