@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { SCENE_KEYS } from './scene-keys';
 import { ASSET_KEYS, ASSET_PACK_KEYS } from '../common/assets';
+import { LEVEL_NAME } from '../common/common';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -17,7 +18,12 @@ export class PreloadScene extends Phaser.Scene {
   public create(): void {
     this.#createAnimations();
 
-    this.scene.start(SCENE_KEYS.GAME_SCENE);
+    // TODO: grab from data manager later
+    this.scene.start(SCENE_KEYS.GAME_SCENE, {
+      level: LEVEL_NAME.DUNGEON_1,
+      roomId: 1,
+      doorId: 1,
+    });
   }
 
   #createAnimations(): void {
