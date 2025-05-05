@@ -7,7 +7,7 @@ import { Spider } from '../game-objects/enemies/spider';
 import { Wisp } from '../game-objects/enemies/wisp';
 import { CharacterGameObject } from '../game-objects/common/game-object';
 import { CHEST_STATE, DIRECTION } from '../common/common';
-import { PLAYER_START_MAX_LIFE } from '../common/config';
+import { DEBUG_COLLISION_ALPHA, PLAYER_START_MAX_LIFE } from '../common/config';
 import { Pot } from '../game-objects/objects/pot';
 import { Chest } from '../game-objects/objects/chest';
 import { GameObject, LevelData } from '../common/types';
@@ -35,7 +35,9 @@ export class GameScene extends Phaser.Scene {
       enemyGroup?: Phaser.GameObjects.Group,
       room: TiledRoomObject;
     }
-  }
+  };
+  #collisionLayer!: Phaser.Tilemaps.TilemapLayer;
+  #enemyCollisionLayer!: Phaser.Tilemaps.TilemapLayer;
 
   constructor() {
     super({
@@ -57,6 +59,10 @@ export class GameScene extends Phaser.Scene {
     this.#controls = new KeyboardComponent(this.input.keyboard);
 
     this.#createLevel();
+    if (this.#collisionLayer === undefined || this.#enemyCollisionLayer === undefined) {
+      console.warn(`Missing required collisions layers for game.`);
+      return;
+    }
     this.#setupPlayer();
     this.#setupCamera();
 
@@ -107,6 +113,12 @@ export class GameScene extends Phaser.Scene {
         pot.break();
       })
     }
+
+    this.#collisionLayer.setCollision([this.#collisionLayer.tileset[0].firstgid]);
+    this.physics.add.collider(this.#player, this.#collisionLayer);
+
+    this.#enemyCollisionLayer.setCollision([this.#enemyCollisionLayer.tileset[0].firstgid]);
+    this.physics.add.collider(this.#enemyGroup, this.#enemyCollisionLayer);
   }
 
   #registerCustomEvents(): void {
@@ -126,11 +138,32 @@ export class GameScene extends Phaser.Scene {
     this.add.image(0, 0, ASSET_KEYS[`${this.#levelData.level}_FOREGROUND`], 0).setOrigin(0).setDepth(2);
 
     const map = this.make.tilemap({ key: ASSET_KEYS[`${this.#levelData.level}_LEVEL`] });
+
+    const collisionTiles = map.addTilesetImage(TILED_LAYER_NAMES.COLLISION, ASSET_KEYS.COLLISION);
+    if (collisionTiles === null) {
+      console.log(`encountered error while creating collision tiles from tiled.`);
+      return;
+    }
+
+    const collisionLayer = map.createLayer(TILED_LAYER_NAMES.COLLISION, collisionTiles, 0, 0);
+    if (collisionLayer === null) {
+      console.log(`encountered error while creating collision layer using data from tiled.`);
+      return;
+    }
+    console.log(collisionLayer);
+    this.#collisionLayer = collisionLayer;
+    this.#collisionLayer.setDepth(2).setAlpha(DEBUG_COLLISION_ALPHA);
+
+    const enemyCollisionLayer = map.createLayer(TILED_LAYER_NAMES.ENEMY_COLLISION, collisionTiles, 0, 0);
+    if (enemyCollisionLayer === null) {
+      console.log(`encountered error while creating enemyCollisionLayer layer using data from tiled.`);
+      return;
+    }
+    this.#enemyCollisionLayer = enemyCollisionLayer;
+    this.#enemyCollisionLayer.setDepth(2).setVisible(false);
+
     this.#objectsByRoomId = {};
     this.#createRooms(map, TILED_LAYER_NAMES.ROOMS);
-
-    console.log(this.#objectsByRoomId);
-    console.log(map);
 
     const rooms = getAllLayerNamesWithPrefix(map, TILED_LAYER_NAMES.ROOMS).map((layerName: string) => {
       return {
