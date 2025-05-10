@@ -1,26 +1,23 @@
 import { ASSET_KEYS } from "../../common/assets";
 import { INTERACTIVE_OBJECT_TYPE } from "../../common/common";
+import { TiledPotObject } from "../../common/tiled/types";
 import { CustomGameObject, Position } from "../../common/types";
 import { InteractiveObjectComponent } from "../../components/game-object/interactive-object-component";
 import { ThrowableObjectComponent } from "../../components/game-object/throwable-object-component";
 
-type PotConfig = {
-	scene: Phaser.Scene;
-	position: Position;
-}
-
 export class Pot extends Phaser.Physics.Arcade.Sprite implements CustomGameObject {
 	#position: Position;
 
-	constructor(config: PotConfig) {
-		const { scene, position } = config;
-		super(scene, position.x, position.y, ASSET_KEYS.POT, 0);
+	constructor(scene: Phaser.Scene, config: TiledPotObject) {
+		super(scene, config.x, config.y, ASSET_KEYS.POT, 0);
 
 		scene.add.existing(this);
 		scene.physics.add.existing(this);
-		this.setOrigin(0.1).setImmovable(true);
+		this.setOrigin(0,1).setImmovable(true);
 
-		this.#position = { x: position.x, y: position.y };
+		this.#position = { x: config.x, y: config.y };
+
+		console.log(this.#position)
 
 		// add components
 		new InteractiveObjectComponent(this, INTERACTIVE_OBJECT_TYPE.PICKUP);

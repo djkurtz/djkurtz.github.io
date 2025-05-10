@@ -22,9 +22,7 @@ export class GameScene extends Phaser.Scene {
   #levelData!: LevelData;
   #controls!: KeyboardComponent;
   #player!: Player;
-  #enemyGroup!: Phaser.GameObjects.Group;
   #blockingGroup!: Phaser.GameObjects.Group;
-  #potGameObjects!: Pot[];
   #objectsByRoomId!: {
     [key: number]: {
       chestMap: { [key: number]: Chest },
@@ -70,63 +68,77 @@ export class GameScene extends Phaser.Scene {
     this.#setupPlayer();
     this.#setupCamera();
 
-    // TODO update from tile data
-    this.#tempCode();
-
     this.#registerColliders();
     this.#registerCustomEvents();
   }
 
   #registerColliders(): void {
-    this.#enemyGroup.getChildren().forEach((enemy) => {
-      const enemyGameObject = enemy as CharacterGameObject;
-      enemyGameObject.setCollideWorldBounds(true);
+    // collision between player and map walls
+    this.#collisionLayer.setCollision([this.#collisionLayer.tileset[0].firstgid]);
+    this.#enemyCollisionLayer.setCollision([this.#enemyCollisionLayer.tileset[0].firstgid]);
+    this.physics.add.collider(this.#player, this.#collisionLayer);
+
+    // collision between player and game objects
+    this.physics.add.overlap(this.#player, this.#doorTransitionGroup, (playerObj, doorObj) => {
+      this.#handleRoomTransition(doorObj as Phaser.Types.Physics.Arcade.GameObjectWithBody);
     });
 
-    this.physics.add.overlap(this.#player, this.#enemyGroup, (player, enemy) => {
-      this.#player.hit(DIRECTION.DOWN, 1);
-      const enemyGameObject = enemy as CharacterGameObject;
-      enemyGameObject.hit(this.#player.direction, 1);
-    });
-
+    // register collisions between player and blocking game objects
     this.physics.add.collider(this.#player, this.#blockingGroup, (player, gameObject) => {
       this.#player.collidedWithGameObject(gameObject as GameObject);
     });
 
-    this.physics.add.overlap(this.#player, this.#doorTransitionGroup, (playerObj, doorObj) => {
-      this.#handleRoomTransition(doorObj as Phaser.Types.Physics.Arcade.GameObjectWithBody);
-    })
+    Object.keys(this.#objectsByRoomId).forEach((key) => {
+      const roomId = parseInt(key, 10);
+      if (this.#objectsByRoomId[roomId] === undefined) {
+        return;
+      }
 
-    this.physics.add.collider(this.#enemyGroup, this.#blockingGroup, (enemy, gameObject) => {
-      if (gameObject instanceof Pot && isArcadePhysicsBody(gameObject.body) && (gameObject.body.velocity.x !== 0 || gameObject.body.velocity.y !== 0)) {
-        const enemyGameObject = enemy as CharacterGameObject;
-        if (enemyGameObject instanceof CharacterGameObject) {
+      if (this.#objectsByRoomId[roomId].enemyGroup !== undefined) {
+        // collide with walls, doors, etc.
+        this.physics.add.collider(this.#objectsByRoomId[roomId].enemyGroup, this.#enemyCollisionLayer);
+
+        // register collisions between enemies and curent "room"
+        this.physics.add.overlap(this.#player, this.#objectsByRoomId[roomId].enemyGroup, (player, enemy) => {
+          this.#player.hit(DIRECTION.DOWN, 1);
+          const enemyGameObject = enemy as CharacterGameObject;
           enemyGameObject.hit(this.#player.direction, 1);
-          gameObject.break();
-        }
+        });
+
+        this.physics.add.collider(this.#objectsByRoomId[roomId].enemyGroup, this.#blockingGroup, (enemy, gameObject) => {
+          if (gameObject instanceof Pot && isArcadePhysicsBody(gameObject.body) && (gameObject.body.velocity.x !== 0 || gameObject.body.velocity.y !== 0)) {
+            const enemyGameObject = enemy as CharacterGameObject;
+            if (enemyGameObject instanceof CharacterGameObject) {
+              enemyGameObject.hit(this.#player.direction, 1);
+              gameObject.break();
+            }
+          }
+        }, (enemy, gameObject) => {
+          const body = (gameObject as unknown as GameObject).body;
+          if (enemy instanceof Wisp && isArcadePhysicsBody(body) && (body.velocity.x !== 0 || body.velocity.y !== 0)) {
+            return false;
+          }
+          return true;
+        });
+
       }
-    }, (enemy, gameObject) => {
-      const body = (gameObject as unknown as GameObject).body;
-      if (enemy instanceof Wisp && isArcadePhysicsBody(body) && (body.velocity.x !== 0 || body.velocity.y !== 0)) {
-        return false;
+
+      if (this.#objectsByRoomId[roomId].pots.length > 0) {
+        this.physics.add.collider(this.#objectsByRoomId[roomId].pots, this.#blockingGroup, (pot) => {
+          if (!(pot instanceof Pot)) {
+            return;
+          }
+          pot.break();
+        })
+
+        this.physics.add.collider(this.#objectsByRoomId[roomId].pots, this.#collisionLayer, (pot) => {
+          if (!(pot instanceof Pot)) {
+            return;
+          }
+          pot.break();
+        })
       }
-      return true;
-    });
-
-    if (this.#potGameObjects.length > 0) {
-      this.physics.add.collider(this.#potGameObjects, this.#blockingGroup, (pot) => {
-        if (!(pot instanceof Pot)) {
-          return;
-        }
-        pot.break();
-      })
-    }
-
-    this.#collisionLayer.setCollision([this.#collisionLayer.tileset[0].firstgid]);
-    this.physics.add.collider(this.#player, this.#collisionLayer);
-
-    this.#enemyCollisionLayer.setCollision([this.#enemyCollisionLayer.tileset[0].firstgid]);
-    this.physics.add.collider(this.#enemyGroup, this.#enemyCollisionLayer);
+    })
   }
 
   #registerCustomEvents(): void {
@@ -173,6 +185,7 @@ export class GameScene extends Phaser.Scene {
     // Initialize objects
     this.#objectsByRoomId = {};
     this.#doorTransitionGroup = this.add.group([]);
+    this.#blockingGroup = this.add.group([]);
 
     // Create game objects
     this.#createRooms(map, TILED_LAYER_NAMES.ROOMS);
@@ -235,48 +248,6 @@ export class GameScene extends Phaser.Scene {
     })
   }
 
-  #tempCode(): void {
-    this.add
-      .text(this.scale.width / 2, this.scale.height / 2, 'Game Scene', { fontFamily: ASSET_KEYS.FONT_PRESS_START_2P })
-      .setOrigin(0.5);
-
-    this.#enemyGroup = this.add.group([
-      new Spider({
-        scene: this,
-        position: { x: this.scale.width / 2, y: this.scale.height / 2 + 50 },
-      }),
-      new Wisp({
-        scene: this,
-        position: { x: this.scale.width / 2, y: this.scale.height / 2 - 50 },
-      }),
-    ],
-      {
-        runChildUpdate: true,
-      },
-    );
-
-    this.#potGameObjects = [];
-    const pot = new Pot({
-      scene: this,
-      position: { x: this.scale.width / 2 + 90, y: this.scale.height / 2 },
-    });
-    this.#potGameObjects.push(pot);
-
-    this.#blockingGroup = this.add.group([
-      pot,
-      new Chest({
-        scene: this,
-        position: { x: this.scale.width / 2 - 90, y: this.scale.height / 2 },
-        requiresBossKey: false,
-      }),
-      new Chest({
-        scene: this,
-        position: { x: this.scale.width / 2 - 90, y: this.scale.height / 2 - 80 },
-        requiresBossKey: true,
-      }),
-    ]);
-  }
-
   #createRooms(map: Phaser.Tilemaps.Tilemap, layerName: string): void {
     const validTiledObjects = getTiledRoomObjectsFromMap(map, layerName);
     validTiledObjects.forEach((tiledObject) => {
@@ -293,7 +264,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   #createDoors(map: Phaser.Tilemaps.Tilemap, layerName: string, roomId: number): void {
-    console.log(layerName, roomId);
     const validTiledObjects = getTiledDoorObjectsFromMap(map, layerName);
     validTiledObjects.forEach((tileObject) => {
       const door = new Door(this, tileObject, roomId);
@@ -310,9 +280,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   #createPots(map: Phaser.Tilemaps.Tilemap, layerName: string, roomId: number): void {
-    console.log(layerName, roomId);
     const validTiledObjects = getTiledPotObjectsFromMap(map, layerName);
-    console.log(validTiledObjects);
+    validTiledObjects.forEach((tileObject) => {
+      const pot = new Pot(this, tileObject);
+      this.#objectsByRoomId[roomId].pots.push(pot);
+      this.#blockingGroup.add(pot);
+    })
   }
 
   #createChests(map: Phaser.Tilemaps.Tilemap, layerName: string, roomId: number): void {
@@ -386,7 +359,7 @@ export class GameScene extends Phaser.Scene {
       duration: CONFIG.ROOM_TRANSITION_CAMERA_ANIMATION_DURATION,
       delay: CONFIG.ROOM_TRANSITION_CAMERA_ANIMATION_DELAY,
       onUpdate: () => {
-          this.cameras.main.setBounds(bounds.x, bounds.y, roomSize.width, roomSize.height);
+        this.cameras.main.setBounds(bounds.x, bounds.y, roomSize.width, roomSize.height);
       },
     });
 
