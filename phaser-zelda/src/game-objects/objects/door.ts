@@ -21,6 +21,7 @@ export class Door implements CustomGameObject {
     this.#targetLevel = config.targetLevel;
     this.#x = config.x;
     this.#y = config.y;
+    this.#direction = config.direction;
 
     this.#doorTransitionZone = this.#scene.add
       .zone(config.x, config.y, config.width, config.height)
