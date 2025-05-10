@@ -20,6 +20,7 @@ export class MoveHoldingState extends BaseMoveState {
 		// if no input is provided, change to idle state
 		if (this.isNoInputMovement(controls)) {
 			this._stateMachine.setState(CHARACTER_STATES.IDLE_HOLDING_STATE);
+			return;
 		}
 
 		this.handleCharacterMovement();

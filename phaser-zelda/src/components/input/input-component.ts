@@ -7,6 +7,7 @@ export class InputComponent {
 #attackKey: boolean;
 #selectKey: boolean;
 #enterKey: boolean;
+#isMovingLocked: boolean;
 
 constructor() {
     this.#up = false;
@@ -17,6 +18,15 @@ constructor() {
     this.#attackKey = false;
     this.#selectKey = false;
     this.#enterKey = false;
+    this.#isMovingLocked = false;
+}
+
+get isMovingLocked(): boolean {
+    return this.#isMovingLocked;
+}
+
+set isMovingLocked(val: boolean) {
+    this.#isMovingLocked = val;
 }
 
 get isUpDown(): boolean {
@@ -100,5 +110,6 @@ public reset(): void {
     this.#attackKey = false;
     this.#selectKey = false;
     this.#enterKey = false;
+    this.#isMovingLocked = false;
 }
 }

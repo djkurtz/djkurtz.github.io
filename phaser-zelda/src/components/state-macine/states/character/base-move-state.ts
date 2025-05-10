@@ -15,7 +15,7 @@ export class BaseMoveState extends BaseCharacterState {
 	}
 
 	protected isNoInputMovement(controls: InputComponent): boolean {
-		return !controls.isUpDown && !controls.isDownDown && !controls.isLeftDown && !controls.isRightDown;
+		return (!controls.isUpDown && !controls.isDownDown && !controls.isLeftDown && !controls.isRightDown) || controls.isMovingLocked;
 	}
 
 	protected handleCharacterMovement(): void {

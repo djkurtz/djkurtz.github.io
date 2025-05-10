@@ -6,13 +6,13 @@ import { KeyboardComponent } from '../components/input/keyboad-component';
 import { Spider } from '../game-objects/enemies/spider';
 import { Wisp } from '../game-objects/enemies/wisp';
 import { CharacterGameObject } from '../game-objects/common/game-object';
-import { CHEST_STATE, DIRECTION } from '../common/common';
-import { DEBUG_COLLISION_ALPHA, PLAYER_START_MAX_LIFE } from '../common/config';
+import { DIRECTION } from '../common/common';
+import * as CONFIG from '../common/config';
 import { Pot } from '../game-objects/objects/pot';
 import { Chest } from '../game-objects/objects/chest';
 import { GameObject, LevelData } from '../common/types';
 import { CUSTOM_EVENTS, EVENT_BUS } from '../common/event-bus';
-import { isArcadePhysicsBody } from '../common/utils';
+import { getDirectionOfObjectFromAnotherObject, isArcadePhysicsBody } from '../common/utils';
 import { TiledRoomObject } from '../common/tiled/types';
 import { getAllLayerNamesWithPrefix, getTiledChestObjectsFromMap, getTiledDoorObjectsFromMap, getTiledEnemyObjectsFromMap, getTiledPotObjectsFromMap, getTiledRoomObjectsFromMap, getTiledSwitchObjectsFromMap } from '../common/tiled/tiled-utils';
 import { TILED_LAYER_NAMES } from '../common/tiled/common';
@@ -160,7 +160,7 @@ export class GameScene extends Phaser.Scene {
     }
     console.log(collisionLayer);
     this.#collisionLayer = collisionLayer;
-    this.#collisionLayer.setDepth(2).setAlpha(DEBUG_COLLISION_ALPHA);
+    this.#collisionLayer.setDepth(2).setAlpha(CONFIG.DEBUG_COLLISION_ALPHA);
 
     const enemyCollisionLayer = map.createLayer(TILED_LAYER_NAMES.ENEMY_COLLISION, collisionTiles, 0, 0);
     if (enemyCollisionLayer === null) {
@@ -207,8 +207,8 @@ export class GameScene extends Phaser.Scene {
       scene: this,
       position: { x: this.scale.width / 2, y: this.scale.height / 2 },
       controls: this.#controls,
-      maxLife: PLAYER_START_MAX_LIFE,
-      currentLife: PLAYER_START_MAX_LIFE,
+      maxLife: CONFIG.PLAYER_START_MAX_LIFE,
+      currentLife: CONFIG.PLAYER_START_MAX_LIFE,
     })
   }
 
@@ -306,5 +306,88 @@ export class GameScene extends Phaser.Scene {
 
   #handleRoomTransition(doorTrigger: Phaser.Types.Physics.Arcade.GameObjectWithBody): void {
     console.log(doorTrigger.name);
+    this.#controls.isMovingLocked = true;
+    const door = this.#objectsByRoomId[this.#currentRoomId].doorMap[doorTrigger.name] as Door;
+    const targetDoor = this.#objectsByRoomId[door.targetRoomId].doorMap[door.targetDoorId];
+
+    door.disableObject();
+    targetDoor.disableObject();
+
+    const targetDirection = getDirectionOfObjectFromAnotherObject(door, targetDoor);
+    const doorDistance = {
+      x: Math.abs((door.doorTransitionZone.x - targetDoor.doorTransitionZone.x) / 2),
+      y: Math.abs((door.doorTransitionZone.y - targetDoor.doorTransitionZone.y) / 2),
+    };
+    if (targetDirection === DIRECTION.UP) {
+      doorDistance.y *= -1;
+    }
+    if (targetDirection === DIRECTION.LEFT) {
+      doorDistance.x *= -1;
+    }
+
+    const playerTargetPosition = {
+      x: door.x + door.doorTransitionZone.width / 2 + doorDistance.x,
+      y: door.y - door.doorTransitionZone.height / 2 + doorDistance.y,
+    }
+    this.tweens.add({
+      targets: this.#player,
+      y: playerTargetPosition.y,
+      x: playerTargetPosition.x,
+      duration: CONFIG.ROOM_TRANSITION_PLAYER_INTO_HALL_DURATION,
+      delay: CONFIG.ROOM_TRANSITION_PLAYER_INTO_HALL_DELAY,
+    });
+
+    const roomSize = this.#objectsByRoomId[targetDoor.roomId].room;
+    this.cameras.main.setBounds(
+      this.cameras.main.worldView.x,
+      this.cameras.main.worldView.y,
+      this.cameras.main.worldView.width,
+      this.cameras.main.worldView.height,
+    );
+    this.cameras.main.stopFollow();
+    const bounds = this.cameras.main.getBounds();
+    this.tweens.add({
+      targets: bounds,
+      x: roomSize.x,
+      y: roomSize.y - roomSize.height,
+      duration: CONFIG.ROOM_TRANSITION_CAMERA_ANIMATION_DURATION,
+      delay: CONFIG.ROOM_TRANSITION_CAMERA_ANIMATION_DELAY,
+      onUpdate: () => {
+          this.cameras.main.setBounds(bounds.x, bounds.y, roomSize.width, roomSize.height);
+      },
+    });
+
+    // animate player into room
+    const playerDistanceToMoveIntoRoom = {
+      x: doorDistance.x * 2,
+      y: doorDistance.y * 2,
+    };
+
+    if (targetDirection === DIRECTION.UP || targetDirection === DIRECTION.DOWN) {
+      playerDistanceToMoveIntoRoom.y = Math.max(Math.abs(playerDistanceToMoveIntoRoom.y), 32);
+      if (targetDirection === DIRECTION.UP) {
+        playerDistanceToMoveIntoRoom.y *= -1;
+      }
+    } else {
+      playerDistanceToMoveIntoRoom.x = Math.max(Math.abs(playerDistanceToMoveIntoRoom.x), 32);
+      if (targetDirection === DIRECTION.LEFT) {
+        playerDistanceToMoveIntoRoom.x *= -1;
+      }
+    }
+
+    this.tweens.add({
+      targets: this.#player,
+      y: playerTargetPosition.y + playerDistanceToMoveIntoRoom.y,
+      x: playerTargetPosition.x + playerDistanceToMoveIntoRoom.x,
+      duration: CONFIG.ROOM_TRANSITION_PLAYER_INTO_NEXT_ROOM_DURATION,
+      delay: CONFIG.ROOM_TRANSITION_PLAYER_INTO_NEXT_ROOM_DELAY,
+      onComplete: () => {
+        targetDoor.enableObject();
+        this.#currentRoomId = targetDoor.roomId;
+        this.cameras.main.startFollow(this.#player);
+        this.#controls.isMovingLocked = false;
+      }
+    });
   }
 }
+
