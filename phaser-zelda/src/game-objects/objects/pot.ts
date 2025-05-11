@@ -17,8 +17,6 @@ export class Pot extends Phaser.Physics.Arcade.Sprite implements CustomGameObjec
 
 		this.#position = { x: config.x, y: config.y };
 
-		console.log(this.#position)
-
 		// add components
 		new InteractiveObjectComponent(this, INTERACTIVE_OBJECT_TYPE.PICKUP);
 		new ThrowableObjectComponent(this, () => {

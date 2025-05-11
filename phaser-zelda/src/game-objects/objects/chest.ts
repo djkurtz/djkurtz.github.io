@@ -1,9 +1,10 @@
 import { ASSET_KEYS, CHEST_FRAME_KEYS } from "../../common/assets";
-import { CHEST_STATE, INTERACTIVE_OBJECT_TYPE } from "../../common/common";
+import { CHEST_STATE, INTERACTIVE_OBJECT_TYPE, LEVEL_NAME } from "../../common/common";
 import { TRAP_TYPE } from "../../common/tiled/common";
 import { ChestReward, TiledChestObject, TrapType } from "../../common/tiled/types";
 import { ChestState, CustomGameObject, Position } from "../../common/types";
 import { InteractiveObjectComponent } from "../../components/game-object/interactive-object-component";
+import { InventoryManager } from "../../components/inventory/inventory-manager";
 
 export class Chest extends Phaser.Physics.Arcade.Image implements CustomGameObject {
 	#state: ChestState;
@@ -38,8 +39,11 @@ export class Chest extends Phaser.Physics.Arcade.Image implements CustomGameObje
 				if (!this.#isBossKeyChest) {
 					return true;
 				}
-				// TODO: make sure player has boss key
-				return false;
+				// TODO: Update to use area information from data manager
+				if (!InventoryManager.instance.getAreaInventory(LEVEL_NAME.DUNGEON_1).bossKey) {
+					return false;
+				}
+				return true;
 			},
 			() => {
 				this.open();

@@ -1,5 +1,5 @@
 import { CHARACTER_ANIMATIONS } from './assets';
-import { CHEST_STATE, DIRECTION, INTERACTIVE_OBJECT_TYPE, LEVEL_NAME } from './common';
+import { CHEST_STATE, DIRECTION, DUNGEON_ITEM, INTERACTIVE_OBJECT_TYPE, LEVEL_NAME } from './common';
 
 export type CharacterAnimation = keyof typeof CHARACTER_ANIMATIONS;
 
@@ -28,3 +28,5 @@ export type LevelData = {
     doorId: number;
     roomId: number;
 }
+
+export type DungeonItem = keyof typeof DUNGEON_ITEM;

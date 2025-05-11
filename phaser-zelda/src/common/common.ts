@@ -21,3 +21,10 @@ export const LEVEL_NAME = {
     WORLD: 'WORLD',
     DUNGEON_1: 'DUNGEON_1',
 } as const;
+
+export const DUNGEON_ITEM = {
+    SMALL_KEY: 'SMALL_KEY',
+    BOSS_KEY: 'BOSS_KEY',
+    MAP: 'MAP',
+    COMPASS: 'COMPASS',
+} as const;

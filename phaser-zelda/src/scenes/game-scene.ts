@@ -1,12 +1,12 @@
 import * as Phaser from 'phaser';
 import { SCENE_KEYS } from './scene-keys';
-import { ASSET_KEYS } from '../common/assets';
+import { ASSET_KEYS, CHEST_REWARD_TO_TEXTURE_FRAME } from '../common/assets';
 import { Player } from '../game-objects/player/player';
 import { KeyboardComponent } from '../components/input/keyboad-component';
 import { Spider } from '../game-objects/enemies/spider';
 import { Wisp } from '../game-objects/enemies/wisp';
 import { CharacterGameObject } from '../game-objects/common/game-object';
-import { DIRECTION } from '../common/common';
+import { DIRECTION, LEVEL_NAME } from '../common/common';
 import * as CONFIG from '../common/config';
 import { Pot } from '../game-objects/objects/pot';
 import { Chest } from '../game-objects/objects/chest';
@@ -17,7 +17,8 @@ import { TiledRoomObject } from '../common/tiled/types';
 import { getAllLayerNamesWithPrefix, getTiledChestObjectsFromMap, getTiledDoorObjectsFromMap, getTiledEnemyObjectsFromMap, getTiledPotObjectsFromMap, getTiledRoomObjectsFromMap, getTiledSwitchObjectsFromMap } from '../common/tiled/tiled-utils';
 import { Door } from '../game-objects/objects/door';
 import { Button } from '../game-objects/objects/button';
-import { DOOR_TYPE, SWITCH_ACTION, TILED_LAYER_NAMES, TRAP_TYPE } from '../common/tiled/common';
+import { CHEST_REWARD, DOOR_TYPE, SWITCH_ACTION, TILED_LAYER_NAMES, TRAP_TYPE } from '../common/tiled/common';
+import { InventoryManager } from '../components/inventory/inventory-manager';
 
 export class GameScene extends Phaser.Scene {
   #levelData!: LevelData;
@@ -42,6 +43,7 @@ export class GameScene extends Phaser.Scene {
   #currentRoomId!: number;
   #lockedDoorGroup!: Phaser.GameObjects.Group;
   #switchGroup!: Phaser.GameObjects.Group;
+  #rewardItem!: Phaser.GameObjects.Image;
 
   constructor() {
     super({
@@ -50,7 +52,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   public init(data: LevelData): void {
-    console.log(data);
     this.#levelData = data;
     this.#currentRoomId = data.roomId;
   }
@@ -70,6 +71,7 @@ export class GameScene extends Phaser.Scene {
     }
     this.#setupPlayer();
     this.#setupCamera();
+    this.#rewardItem = this.add.image(0, 0, ASSET_KEYS.UI_ICONS, 0).setVisible(false).setOrigin(0, 1);
 
     this.#registerColliders();
     this.#registerCustomEvents();
@@ -160,8 +162,25 @@ export class GameScene extends Phaser.Scene {
   }
 
   #handleOpenChest(chest: Chest): void {
-    console.log('chest opened');
-    // TODO: 
+    if (chest.contents !== CHEST_REWARD.NOTHING) {
+      InventoryManager.instance.addDungeonItem(this.#levelData.level, chest.contents);
+    }
+    this.#rewardItem
+      .setFrame(CHEST_REWARD_TO_TEXTURE_FRAME[chest.contents])
+      .setVisible(true)
+      .setPosition(chest.x, chest.y);
+
+    this.tweens.add({
+      targets: this.#rewardItem,
+      y: this.#rewardItem.y - 16,
+      duration: 500,
+      onComplete: () => {
+        this.time.delayedCall(1000, () => {
+          this.#rewardItem.setVisible(false);
+        });
+        console.log(InventoryManager.instance.getAreaInventory(LEVEL_NAME.DUNGEON_1));
+      }
+    })
   }
 
   #createLevel(): void {
@@ -181,7 +200,6 @@ export class GameScene extends Phaser.Scene {
       console.log(`encountered error while creating collision layer using data from tiled.`);
       return;
     }
-    console.log(collisionLayer);
     this.#collisionLayer = collisionLayer;
     this.#collisionLayer.setDepth(2).setAlpha(CONFIG.DEBUG_COLLISION_ALPHA);
 
@@ -230,12 +248,10 @@ export class GameScene extends Phaser.Scene {
 
   #setupPlayer(): void {
     const startingDoor = this.#objectsByRoomId[this.#levelData.roomId].doorMap[this.#levelData.doorId];
-    console.log(startingDoor);
     const playerStartPosition = {
       x: startingDoor.x + startingDoor.doorTransitionZone.width / 2,
       y: startingDoor.y - startingDoor.doorTransitionZone.height / 2,
     };
-    console.log(playerStartPosition);
     switch (startingDoor.direction) {
       case DIRECTION.UP:
         playerStartPosition.y += 40;
@@ -360,7 +376,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   #handleRoomTransition(doorTrigger: Phaser.Types.Physics.Arcade.GameObjectWithBody): void {
-    console.log(doorTrigger.name);
     this.#controls.isMovingLocked = true;
     const door = this.#objectsByRoomId[this.#currentRoomId].doorMap[doorTrigger.name] as Door;
     const modifiedLevelName = door.targetLevel.toUpperCase();
