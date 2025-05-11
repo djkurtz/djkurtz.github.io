@@ -1,5 +1,5 @@
 import { DIRECTION } from "../../../../common/common";
-import { CharacterGameObject } from "../../../../game-objects/common/game-object";
+import { CharacterGameObject } from "../../../../game-objects/common/character-game-object";
 import { HeldGameObjectComponent } from "../../../game-object/held-game-object-component";
 import { BaseMoveState } from "./base-move-state";
 import { CHARACTER_STATES } from "./character-states";

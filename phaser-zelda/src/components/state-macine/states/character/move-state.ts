@@ -1,6 +1,6 @@
 import { INTERACTIVE_OBJECT_TYPE } from "../../../../common/common";
 import { exhaustiveGuard } from "../../../../common/utils";
-import { CharacterGameObject } from "../../../../game-objects/common/game-object";
+import { CharacterGameObject } from "../../../../game-objects/common/character-game-object";
 import { CollidingObjectsComponent } from "../../../game-object/colliding-objects-component";
 import { InteractiveObjectComponent } from "../../../game-object/interactive-object-component";
 import { InputComponent } from "../../../input/input-component";

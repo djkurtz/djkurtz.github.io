@@ -1,7 +1,7 @@
 import { CHARACTER_ANIMATIONS } from "../../../../common/assets";
 import { CUSTOM_EVENTS, EVENT_BUS } from "../../../../common/event-bus";
 import { isArcadePhysicsBody } from "../../../../common/utils";
-import { CharacterGameObject } from "../../../../game-objects/common/game-object";
+import { CharacterGameObject } from "../../../../game-objects/common/character-game-object";
 import { HeldGameObjectComponent } from "../../../game-object/held-game-object-component";
 import { ThrowableObjectComponent } from "../../../game-object/throwable-object-component";
 import { BaseCharacterState } from "./base-character-state";

@@ -5,7 +5,7 @@ import { AnimationConfig } from "../../components/game-object/animation-componen
 import { InputComponent } from "../../components/input/input-component";
 import { BounceMoveState } from "../../components/state-macine/states/character/bounce-move-state";
 import { CHARACTER_STATES } from "../../components/state-macine/states/character/character-states";
-import { CharacterGameObject } from "../common/game-object";
+import { CharacterGameObject } from "../common/character-game-object";
 
 export type WispConfig = {
     scene: Phaser.Scene;

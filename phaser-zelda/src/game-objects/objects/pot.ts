@@ -13,7 +13,7 @@ export class Pot extends Phaser.Physics.Arcade.Sprite implements CustomGameObjec
 
 		scene.add.existing(this);
 		scene.physics.add.existing(this);
-		this.setOrigin(0,1).setImmovable(true);
+		this.setOrigin(0, 1).setImmovable(true);
 
 		this.#position = { x: config.x, y: config.y };
 
@@ -22,6 +22,9 @@ export class Pot extends Phaser.Physics.Arcade.Sprite implements CustomGameObjec
 		new ThrowableObjectComponent(this, () => {
 			this.break();
 		});
+
+		// By default, disable physics body and make inactive and invisible
+		this.disableObject();
 	}
 
 	public disableObject(): void {
@@ -43,5 +46,12 @@ export class Pot extends Phaser.Physics.Arcade.Sprite implements CustomGameObjec
 			this.setTexture(ASSET_KEYS.POT, 0);
 			this.disableObject();
 		})
+	}
+
+	public resetPosition(): void {
+		this.scene.time.delayedCall(1, () => {
+			this.setPosition(this.#position.x, this.#position.y).setOrigin(0, 1);
+			this.enableObject();
+		});
 	}
 }

@@ -1,5 +1,5 @@
 import { isArcadePhysicsBody } from "../../../../common/utils";
-import { CharacterGameObject } from "../../../../game-objects/common/game-object";
+import { CharacterGameObject } from "../../../../game-objects/common/character-game-object";
 import { State, StateMachine } from "../../state-machine";
 
 export class BaseCharacterState implements State {

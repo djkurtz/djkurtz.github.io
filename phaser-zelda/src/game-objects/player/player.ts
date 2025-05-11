@@ -16,7 +16,7 @@ import { MoveHoldingState } from "../../components/state-macine/states/character
 import { MoveState } from "../../components/state-macine/states/character/move-state";
 import { OpenChestState } from "../../components/state-macine/states/character/open-chest-state";
 import { ThrowState } from "../../components/state-macine/states/character/throw-state";
-import { CharacterGameObject } from "../common/game-object";
+import { CharacterGameObject } from "../common/character-game-object";
 
 export type PlayerConfig = {
 	scene: Phaser.Scene;

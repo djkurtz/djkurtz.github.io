@@ -1,7 +1,7 @@
 import { DIRECTION } from "../../../../common/common";
 import { Direction } from "../../../../common/types";
 import { isArcadePhysicsBody } from "../../../../common/utils";
-import { CharacterGameObject } from "../../../../game-objects/common/game-object";
+import { CharacterGameObject } from "../../../../game-objects/common/character-game-object";
 import { InputComponent } from "../../../input/input-component";
 import { BaseCharacterState } from "./base-character-state";
 import { CHARACTER_STATES } from "./character-states";

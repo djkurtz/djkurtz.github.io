@@ -10,7 +10,7 @@ type ButtonPressedEvent = {
 
 export class Button extends Phaser.Physics.Arcade.Image implements CustomGameObject {
   #switchTargetIds: number[];
-  #sitchAction: SwitchAction;
+  #switchAction: SwitchAction;
 
   constructor(scene: Phaser.Scene, config: TiledSwitchObject) {
     const frame = config.texture === SWITCH_TEXTURE.FLOOR ? BUTTON_FRAME_KEYS.FLOOR_SWITCH : BUTTON_FRAME_KEYS.PLATE_SWITCH;
@@ -18,16 +18,19 @@ export class Button extends Phaser.Physics.Arcade.Image implements CustomGameObj
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.setOrigin(0,1).setImmovable(true);
+    this.setOrigin(0, 1).setImmovable(true);
 
     this.#switchTargetIds = config.targetIds;
-    this.#sitchAction =config.action;
+    this.#switchAction = config.action;
+
+    // By default, disable physics body and make inactive and invisible
+    this.disableObject();
   }
 
   public press(): ButtonPressedEvent {
     this.disableObject();
     return {
-      action: this.#sitchAction,
+      action: this.#switchAction,
       targetIds: this.#switchTargetIds,
     };
   }

@@ -3,7 +3,7 @@ import { DIRECTION } from "../../../../common/common";
 import { HURT_PUSH_BACK_DELAY } from "../../../../common/config";
 import { Direction } from "../../../../common/types";
 import { exhaustiveGuard, isArcadePhysicsBody } from "../../../../common/utils";
-import { CharacterGameObject } from "../../../../game-objects/common/game-object";
+import { CharacterGameObject } from "../../../../game-objects/common/character-game-object";
 import { DirectionComponent } from "../../../game-object/direction-component";
 import { HeldGameObjectComponent } from "../../../game-object/held-game-object-component";
 import { ThrowableObjectComponent } from "../../../game-object/throwable-object-component";

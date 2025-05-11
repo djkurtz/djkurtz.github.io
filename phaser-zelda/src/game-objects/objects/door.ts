@@ -80,6 +80,9 @@ export class Door implements CustomGameObject {
 
       this.#doorObject = door;
     }
+
+    // By default, disable physics body and make inactive and invisible
+    this.disableObject();
   }
 
   get x(): number {
