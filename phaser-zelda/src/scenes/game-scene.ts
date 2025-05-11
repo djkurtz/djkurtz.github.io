@@ -15,8 +15,9 @@ import { CUSTOM_EVENTS, EVENT_BUS } from '../common/event-bus';
 import { exhaustiveGuard, getDirectionOfObjectFromAnotherObject, isArcadePhysicsBody, isLevelName } from '../common/utils';
 import { TiledRoomObject } from '../common/tiled/types';
 import { getAllLayerNamesWithPrefix, getTiledChestObjectsFromMap, getTiledDoorObjectsFromMap, getTiledEnemyObjectsFromMap, getTiledPotObjectsFromMap, getTiledRoomObjectsFromMap, getTiledSwitchObjectsFromMap } from '../common/tiled/tiled-utils';
-import { TILED_LAYER_NAMES } from '../common/tiled/common';
 import { Door } from '../game-objects/objects/door';
+import { Button } from '../game-objects/objects/button';
+import { DOOR_TYPE, TILED_LAYER_NAMES } from '../common/tiled/common';
 
 export class GameScene extends Phaser.Scene {
   #levelData!: LevelData;
@@ -39,6 +40,8 @@ export class GameScene extends Phaser.Scene {
   #enemyCollisionLayer!: Phaser.Tilemaps.TilemapLayer;
   #doorTransitionGroup!: Phaser.GameObjects.Group;
   #currentRoomId!: number;
+  #lockedDoorGroup!: Phaser.GameObjects.Group;
+  #switchGroup!: Phaser.GameObjects.Group;
 
   constructor() {
     super({
@@ -81,6 +84,9 @@ export class GameScene extends Phaser.Scene {
     // collision between player and game objects
     this.physics.add.overlap(this.#player, this.#doorTransitionGroup, (playerObj, doorObj) => {
       this.#handleRoomTransition(doorObj as Phaser.Types.Physics.Arcade.GameObjectWithBody);
+    });
+    this.physics.add.overlap(this.#player, this.#switchGroup, (playerObj, switchObj) => {
+      this.#handleButtonPress(switchObj as Button);
     });
 
     // register collisions between player and blocking game objects
@@ -186,6 +192,8 @@ export class GameScene extends Phaser.Scene {
     this.#objectsByRoomId = {};
     this.#doorTransitionGroup = this.add.group([]);
     this.#blockingGroup = this.add.group([]);
+    this.#lockedDoorGroup = this.add.group([]);
+    this.#switchGroup = this.add.group({});
 
     // Create game objects
     this.#createRooms(map, TILED_LAYER_NAMES.ROOMS);
@@ -270,13 +278,27 @@ export class GameScene extends Phaser.Scene {
       this.#objectsByRoomId[roomId].doors.push(door);
       this.#objectsByRoomId[roomId].doorMap[tileObject.id] = door;
       this.#doorTransitionGroup.add(door.doorTransitionZone);
-    })
+
+      if (door.doorObject === undefined) {
+        return;
+      }
+
+      if (door.doorType === DOOR_TYPE.LOCK || door.doorType === DOOR_TYPE.BOSS) {
+        this.#lockedDoorGroup.add(door.doorObject);
+        return;
+      }
+      this.#blockingGroup.add(door.doorObject);
+    });
+
   }
 
   #createButtons(map: Phaser.Tilemaps.Tilemap, layerName: string, roomId: number): void {
-    console.log(layerName, roomId);
     const validTiledObjects = getTiledSwitchObjectsFromMap(map, layerName);
-    console.log(validTiledObjects);
+    validTiledObjects.forEach((tileObject) => {
+      const button = new Button(this, tileObject);
+      this.#objectsByRoomId[roomId].switches.push(button);
+      this.#switchGroup.add(button)
+    })
   }
 
   #createPots(map: Phaser.Tilemaps.Tilemap, layerName: string, roomId: number): void {
@@ -312,7 +334,7 @@ export class GameScene extends Phaser.Scene {
       if (tiledObject.type === 1) {
         const spider = new Spider({
           scene: this,
-          position: { x: tiledObject.x , y: tiledObject.y },
+          position: { x: tiledObject.x, y: tiledObject.y },
         });
         this.#objectsByRoomId[roomId].enemyGroup.add(spider);
         continue;
@@ -320,7 +342,7 @@ export class GameScene extends Phaser.Scene {
       if (tiledObject.type === 2) {
         const spider = new Wisp({
           scene: this,
-          position: { x: tiledObject.x , y: tiledObject.y },
+          position: { x: tiledObject.x, y: tiledObject.y },
         });
         this.#objectsByRoomId[roomId].enemyGroup.add(spider);
         continue;
@@ -426,6 +448,10 @@ export class GameScene extends Phaser.Scene {
         this.#controls.isMovingLocked = false;
       }
     });
+  }
+
+  #handleButtonPress(button: Button): void {
+    console.log(button);
   }
 }
 

@@ -1,0 +1,46 @@
+import { ASSET_KEYS, BUTTON_FRAME_KEYS } from "../../common/assets";
+import { SWITCH_TEXTURE } from "../../common/tiled/common";
+import { SwitchAction, TiledSwitchObject } from "../../common/tiled/types";
+import { CustomGameObject } from "../../common/types";
+
+type ButtonPressedEvent = {
+  action: SwitchAction;
+  targetIds: number[];
+}
+
+export class Button extends Phaser.Physics.Arcade.Image implements CustomGameObject {
+  #switchTargetIds: number[];
+  #sitchAction: SwitchAction;
+
+  constructor(scene: Phaser.Scene, config: TiledSwitchObject) {
+    const frame = config.texture === SWITCH_TEXTURE.FLOOR ? BUTTON_FRAME_KEYS.FLOOR_SWITCH : BUTTON_FRAME_KEYS.PLATE_SWITCH;
+    super(scene, config.x, config.y, ASSET_KEYS.DUNGEON_OBJECTS, frame);
+
+    scene.add.existing(this);
+    scene.physics.add.existing(this);
+    this.setOrigin(0,1).setImmovable(true);
+
+    this.#switchTargetIds = config.targetIds;
+    this.#sitchAction =config.action;
+  }
+
+  public press(): ButtonPressedEvent {
+    this.disableObject();
+    return {
+      action: this.#sitchAction,
+      targetIds: this.#switchTargetIds,
+    };
+  }
+
+  public disableObject(): void {
+    (this.body as Phaser.Physics.Arcade.Body).enable = false;
+    this.active = false;
+    this.visible = false;
+  }
+
+  public enableObject(): void {
+    (this.body as Phaser.Physics.Arcade.Body).enable = true;
+    this.active = true;
+    this.visible = true;
+  }
+}
