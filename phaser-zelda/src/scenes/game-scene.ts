@@ -20,6 +20,7 @@ import { Button } from '../game-objects/objects/button';
 import { CHEST_REWARD, DOOR_TYPE, SWITCH_ACTION, TILED_LAYER_NAMES, TRAP_TYPE } from '../common/tiled/common';
 import { InventoryManager } from '../components/inventory/inventory-manager';
 import { CHARACTER_STATES } from '../components/state-macine/states/character/character-states';
+import { WeaponComponent } from '../components/game-object/weapon-component';
 
 export class GameScene extends Phaser.Scene {
   #levelData!: LevelData;
@@ -136,13 +137,12 @@ export class GameScene extends Phaser.Scene {
         // collide with walls, doors, etc.
         this.physics.add.collider(this.#objectsByRoomId[roomId].enemyGroup, this.#enemyCollisionLayer);
 
-        // register collisions between enemies and curent "room"
-        this.physics.add.overlap(this.#player, this.#objectsByRoomId[roomId].enemyGroup, (player, enemy) => {
+        // register collisions between enemies and player
+        this.physics.add.overlap(this.#player, this.#objectsByRoomId[roomId].enemyGroup, () => {
           this.#player.hit(DIRECTION.DOWN, 1);
-          const enemyGameObject = enemy as CharacterGameObject;
-          enemyGameObject.hit(this.#player.direction, 1);
         });
 
+        // register collisions between enemies and curent "room"
         this.physics.add.collider(this.#objectsByRoomId[roomId].enemyGroup, this.#blockingGroup, (enemy, gameObject) => {
           if (gameObject instanceof Pot && isArcadePhysicsBody(gameObject.body) && (gameObject.body.velocity.x !== 0 || gameObject.body.velocity.y !== 0)) {
             const enemyGameObject = enemy as CharacterGameObject;
@@ -159,6 +159,33 @@ export class GameScene extends Phaser.Scene {
           return true;
         });
 
+        this.physics.add.overlap(
+          this.#objectsByRoomId[roomId].enemyGroup,
+          this.#player.weaponComponent.body,
+          (enemy) => {
+            (enemy as CharacterGameObject).hit(this.#player.direction, this.#player.weaponComponent.weaponDamage);
+          });
+                
+        const enemyWeapons = this.#objectsByRoomId[roomId].enemyGroup.getChildren().flatMap((enemy) => {
+          const weaponComponent = WeaponComponent.getComponent<WeaponComponent>(enemy as GameObject);
+          if (weaponComponent !== undefined) {
+            return [weaponComponent.body];
+          }
+          return [];
+        });
+        if (enemyWeapons.length > 0) {
+        this.physics.add.overlap(
+          enemyWeapons,
+          this.#player,
+          (enemyWeaponBody) => {
+            const weaponComponent = WeaponComponent.getComponent<WeaponComponent>(enemyWeaponBody as GameObject);
+            if (weaponComponent === undefined || weaponComponent.weapon === undefined) {
+              return;
+            }
+            weaponComponent.weapon.onCollisionCallback();
+            this.#player.hit(DIRECTION.DOWN, weaponComponent.weaponDamage);
+          });
+        }
       }
 
       if (this.#objectsByRoomId[roomId].pots.length > 0) {

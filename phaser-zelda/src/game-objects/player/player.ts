@@ -1,10 +1,11 @@
 import { ASSET_KEYS, PLAYER_ANIMATION_KEYS } from "../../common/assets";
-import { PLAYER_HURT_PUSHBACK_SPEED, PLAYER_INVULNERABLE_AFTER_HIT_DURATION, PLAYER_SPEED, PLAYER_START_MAX_LIFE } from "../../common/config";
+import { PLAYER_ATTACK_DAMAGE, PLAYER_HURT_PUSHBACK_SPEED, PLAYER_INVULNERABLE_AFTER_HIT_DURATION, PLAYER_SPEED, PLAYER_START_MAX_LIFE } from "../../common/config";
 import { flash } from "../../common/juice-utils";
 import { GameObject, Position } from "../../common/types";
 import { AnimationConfig } from "../../components/game-object/animation-component";
 import { CollidingObjectsComponent } from "../../components/game-object/colliding-objects-component";
 import { HeldGameObjectComponent } from "../../components/game-object/held-game-object-component";
+import { WeaponComponent } from "../../components/game-object/weapon-component";
 import { InputComponent } from "../../components/input/input-component";
 import { AttackState } from "../../components/state-macine/states/character/attack-state";
 import { CHARACTER_STATES } from "../../components/state-macine/states/character/character-states";
@@ -18,6 +19,8 @@ import { MoveState } from "../../components/state-macine/states/character/move-s
 import { OpenChestState } from "../../components/state-macine/states/character/open-chest-state";
 import { ThrowState } from "../../components/state-macine/states/character/throw-state";
 import { CharacterGameObject } from "../common/character-game-object";
+import { Weapon } from "../weapons/base-weapons";
+import { Sword } from "../weapons/sword";
 
 export type PlayerConfig = {
 	scene: Phaser.Scene;
@@ -29,6 +32,7 @@ export type PlayerConfig = {
 
 export class Player extends CharacterGameObject {
 	#collidingObjectsComponent: CollidingObjectsComponent;
+	#weaponComponent: WeaponComponent;
 
 	constructor(config: PlayerConfig) {
 		// create animation config for component
@@ -83,6 +87,13 @@ export class Player extends CharacterGameObject {
 		// add components
 		this.#collidingObjectsComponent = new CollidingObjectsComponent(this);
 		new HeldGameObjectComponent(this);
+		this.#weaponComponent = new WeaponComponent(this);
+		this.#weaponComponent.weapon = new Sword(this, this.#weaponComponent, {
+			DOWN: PLAYER_ANIMATION_KEYS.SWORD_1_ATTACK_DOWN,
+			UP: PLAYER_ANIMATION_KEYS.SWORD_1_ATTACK_UP,
+			RIGHT: PLAYER_ANIMATION_KEYS.SWORD_1_ATTACK_SIDE,
+			LEFT: PLAYER_ANIMATION_KEYS.SWORD_1_ATTACK_SIDE,
+		}, PLAYER_ATTACK_DAMAGE);
 
 		// add state machine
 		this._stateMachine.addState(new IdleState(this));
@@ -113,6 +124,10 @@ export class Player extends CharacterGameObject {
 		return this.body as Phaser.Physics.Arcade.Body;
 	}
 
+	get weaponComponent(): WeaponComponent {
+		return this.#weaponComponent;
+	}
+
 	public collidedWithGameObject(gameObject: GameObject): void {
 		this.#collidingObjectsComponent.add(gameObject);
 	}
@@ -120,5 +135,6 @@ export class Player extends CharacterGameObject {
 	public update(): void {
 		super.update();
 		this.#collidingObjectsComponent.reset();
+		this.#weaponComponent.update();
 	}
 }
