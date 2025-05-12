@@ -80,6 +80,8 @@ export class GameScene extends Phaser.Scene {
 
     this.#registerColliders();
     this.#registerCustomEvents();
+
+    this.scene.launch(SCENE_KEYS.UI_SCENE);
   }
 
   #registerColliders(): void {

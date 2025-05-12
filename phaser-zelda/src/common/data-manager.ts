@@ -1,5 +1,6 @@
 import { LEVEL_NAME } from "./common";
 import { PLAYER_START_MAX_LIFE } from "./config";
+import { CUSTOM_EVENTS, EVENT_BUS, PLAYER_HEALTH_UPDATE_TYPE, PlayerHealthUpdated, PlayerHealthUpdateType } from "./event-bus";
 import { LevelName } from "./types";
 
 export type PlayerData = {
@@ -96,6 +97,19 @@ export class DataManager {
 	}
 
 	public updatePlayerCurrentHealth(health: number): void {
+		if (health === this.#data.currentHealth) {
+			return;
+		}
+		let healthUpdateType: PlayerHealthUpdateType = PLAYER_HEALTH_UPDATE_TYPE.DECREASE;
+		if (health > this.#data.currentHealth) {
+			healthUpdateType = PLAYER_HEALTH_UPDATE_TYPE.INCREASE;
+		}
+		const dataToPass: PlayerHealthUpdated = {
+			previousHealth: this.#data.currentHealth,
+			currentHealth: health,
+			type: healthUpdateType,
+		}
+		EVENT_BUS.emit(CUSTOM_EVENTS.PLAYER_HEALTH_UPDATED, dataToPass);
 		this.#data.currentHealth = health;
 	}
 
