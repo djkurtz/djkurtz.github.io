@@ -6,6 +6,7 @@ import { AnimationConfig } from "../../components/game-object/animation-componen
 import { CollidingObjectsComponent } from "../../components/game-object/colliding-objects-component";
 import { HeldGameObjectComponent } from "../../components/game-object/held-game-object-component";
 import { InputComponent } from "../../components/input/input-component";
+import { AttackState } from "../../components/state-macine/states/character/attack-state";
 import { CHARACTER_STATES } from "../../components/state-macine/states/character/character-states";
 import { DeathState } from "../../components/state-macine/states/character/death-state";
 import { HurtState } from "../../components/state-macine/states/character/hurt-state";
@@ -97,6 +98,7 @@ export class Player extends CharacterGameObject {
 		this._stateMachine.addState(new IdleHoldingState(this));
 		this._stateMachine.addState(new MoveHoldingState(this));
 		this._stateMachine.addState(new ThrowState(this));
+		this._stateMachine.addState(new AttackState(this));
 		this._stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
 
 		config.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
