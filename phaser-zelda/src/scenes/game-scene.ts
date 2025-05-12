@@ -21,6 +21,7 @@ import { CHEST_REWARD, DOOR_TYPE, SWITCH_ACTION, TILED_LAYER_NAMES, TRAP_TYPE } 
 import { InventoryManager } from '../components/inventory/inventory-manager';
 import { CHARACTER_STATES } from '../components/state-macine/states/character/character-states';
 import { WeaponComponent } from '../components/game-object/weapon-component';
+import { DataManager } from '../common/data-manager';
 
 export class GameScene extends Phaser.Scene {
   #levelData!: LevelData;
@@ -117,7 +118,10 @@ export class GameScene extends Phaser.Scene {
         if (areaInventory.keys > 0) {
           InventoryManager.instance.useAreaSmallKey(this.#levelData.level);
           door.open();
+          // update data manager so we can persist door state.
+          DataManager.instance.updateDoorData(this.#currentRoomId, door.id, true);
         }
+
         return;
       }
 
@@ -125,6 +129,8 @@ export class GameScene extends Phaser.Scene {
         return;
       }
       door.open();
+      // update data manager so we can persist door state.
+      DataManager.instance.updateDoorData(this.#currentRoomId, door.id, true);
     });
 
     Object.keys(this.#objectsByRoomId).forEach((key) => {
@@ -165,7 +171,7 @@ export class GameScene extends Phaser.Scene {
           (enemy) => {
             (enemy as CharacterGameObject).hit(this.#player.direction, this.#player.weaponComponent.weaponDamage);
           });
-                
+
         const enemyWeapons = this.#objectsByRoomId[roomId].enemyGroup.getChildren().flatMap((enemy) => {
           const weaponComponent = WeaponComponent.getComponent<WeaponComponent>(enemy as GameObject);
           if (weaponComponent !== undefined) {
@@ -174,17 +180,17 @@ export class GameScene extends Phaser.Scene {
           return [];
         });
         if (enemyWeapons.length > 0) {
-        this.physics.add.overlap(
-          enemyWeapons,
-          this.#player,
-          (enemyWeaponBody) => {
-            const weaponComponent = WeaponComponent.getComponent<WeaponComponent>(enemyWeaponBody as GameObject);
-            if (weaponComponent === undefined || weaponComponent.weapon === undefined) {
-              return;
-            }
-            weaponComponent.weapon.onCollisionCallback();
-            this.#player.hit(DIRECTION.DOWN, weaponComponent.weaponDamage);
-          });
+          this.physics.add.overlap(
+            enemyWeapons,
+            this.#player,
+            (enemyWeaponBody) => {
+              const weaponComponent = WeaponComponent.getComponent<WeaponComponent>(enemyWeaponBody as GameObject);
+              if (weaponComponent === undefined || weaponComponent.weapon === undefined) {
+                return;
+              }
+              weaponComponent.weapon.onCollisionCallback();
+              this.#player.hit(DIRECTION.DOWN, weaponComponent.weaponDamage);
+            });
         }
       }
 
@@ -209,13 +215,19 @@ export class GameScene extends Phaser.Scene {
   #registerCustomEvents(): void {
     EVENT_BUS.on(CUSTOM_EVENTS.OPENED_CHEST, this.#handleOpenChest, this);
     EVENT_BUS.on(CUSTOM_EVENTS.ENEMY_DESTROYED, this.#checkForAllEnemiesAreDefeated, this);
+    EVENT_BUS.on(CUSTOM_EVENTS.PLAYER_DEFEATED, this.#handlePlayerDefeatedEvent, this);
+
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       EVENT_BUS.off(CUSTOM_EVENTS.OPENED_CHEST, this.#handleOpenChest, this);
       EVENT_BUS.off(CUSTOM_EVENTS.ENEMY_DESTROYED, this.#checkForAllEnemiesAreDefeated, this);
-    })
+      EVENT_BUS.off(CUSTOM_EVENTS.PLAYER_DEFEATED, this.#handlePlayerDefeatedEvent, this);
+    });
   }
 
   #handleOpenChest(chest: Chest): void {
+    // update data manager so we can persist door state.
+    DataManager.instance.updateChestData(this.#currentRoomId, chest.id, true, true);
+
     if (chest.contents !== CHEST_REWARD.NOTHING) {
       InventoryManager.instance.addDungeonItem(this.#levelData.level, chest.contents);
     }
@@ -232,7 +244,6 @@ export class GameScene extends Phaser.Scene {
         this.time.delayedCall(1000, () => {
           this.#rewardItem.setVisible(false);
         });
-        console.log(InventoryManager.instance.getAreaInventory(LEVEL_NAME.DUNGEON_1));
       }
     })
   }
@@ -358,6 +369,13 @@ export class GameScene extends Phaser.Scene {
         return;
       }
 
+      const existingDoorData =
+        DataManager.instance.data.areaDetails[DataManager.instance.data.currentArea.name][roomId]?.doors[tileObject.id];
+      if (existingDoorData !== undefined && existingDoorData.unlocked) {
+        door.open();
+        return;
+      }
+
       if (door.doorType === DOOR_TYPE.LOCK || door.doorType === DOOR_TYPE.BOSS) {
         this.#lockedDoorGroup.add(door.doorObject);
         return;
@@ -392,7 +410,18 @@ export class GameScene extends Phaser.Scene {
       this.#objectsByRoomId[roomId].chests.push(chest);
       this.#objectsByRoomId[roomId].chestMap[chest.id] = chest;
       this.#blockingGroup.add(chest);
-    })
+
+      const existingChestData =
+        DataManager.instance.data.areaDetails[DataManager.instance.data.currentArea.name][roomId]?.chests[tileObject.id];
+      if (existingChestData !== undefined) {
+        if (existingChestData.revealed) {
+          chest.reveal();
+        }
+        if (existingChestData.opened) {
+          chest.open();
+        }
+      }
+    });
   }
 
   #createEnemies(map: Phaser.Tilemaps.Tilemap, layerName: string, roomId: number): void {
@@ -545,7 +574,16 @@ export class GameScene extends Phaser.Scene {
         buttonPressedData.targetIds.forEach((id) => this.#objectsByRoomId[this.#currentRoomId].doorMap[id].open());
         break;
       case SWITCH_ACTION.REVEAL_CHEST:
-        buttonPressedData.targetIds.forEach((id) => this.#objectsByRoomId[this.#currentRoomId].chestMap[id].reveal());
+        buttonPressedData.targetIds.forEach((id) => {
+          this.#objectsByRoomId[this.#currentRoomId].chestMap[id].reveal();
+          const existingChestData =
+            DataManager.instance.data.areaDetails[DataManager.instance.data.currentArea.name][this.#currentRoomId]
+              ?.chests[id];
+          if (!existingChestData || !existingChestData.revealed) {
+            // update data manager so we can persist door state.
+            DataManager.instance.updateChestData(this.#currentRoomId, id, true, false);
+          }
+        });
         break;
       case SWITCH_ACTION.REVEAL_KEY:
         break;
@@ -577,6 +615,11 @@ export class GameScene extends Phaser.Scene {
     this.#objectsByRoomId[this.#currentRoomId].chests.forEach((chest) => {
       if (chest.revealTrigger === TRAP_TYPE.ENEMIES_DEFEATED) {
         chest.reveal();
+        const existingChestData =
+          DataManager.instance.data.areaDetails[DataManager.instance.data.currentArea.name][this.#currentRoomId]?.chests[chest.id];
+        if (!existingChestData || !existingChestData.revealed) {
+          DataManager.instance.updateChestData(this.#currentRoomId, chest.id, true, false);
+        }
       }
     });
     this.#objectsByRoomId[this.#currentRoomId].doors.forEach((door) => {
@@ -610,5 +653,12 @@ export class GameScene extends Phaser.Scene {
     for (const child of this.#objectsByRoomId[roomId].enemyGroup.getChildren()) {
       (child as CharacterGameObject).disableObject();
     }
+  }
+
+  #handlePlayerDefeatedEvent(): void {
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.restart();
+    });
+    this.cameras.main.fadeOut(1000, 0, 0, 0);
   }
 }

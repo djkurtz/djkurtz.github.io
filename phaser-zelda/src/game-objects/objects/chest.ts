@@ -1,5 +1,6 @@
 import { ASSET_KEYS, CHEST_FRAME_KEYS } from "../../common/assets";
 import { CHEST_STATE, INTERACTIVE_OBJECT_TYPE, LEVEL_NAME } from "../../common/common";
+import { DataManager } from "../../common/data-manager";
 import { TRAP_TYPE } from "../../common/tiled/common";
 import { ChestReward, TiledChestObject, TrapType } from "../../common/tiled/types";
 import { ChestState, CustomGameObject, Position } from "../../common/types";
@@ -39,8 +40,7 @@ export class Chest extends Phaser.Physics.Arcade.Image implements CustomGameObje
 				if (!this.#isBossKeyChest) {
 					return true;
 				}
-				// TODO: Update to use area information from data manager
-				if (!InventoryManager.instance.getAreaInventory(LEVEL_NAME.DUNGEON_1).bossKey) {
+				if (!InventoryManager.instance.getAreaInventory(DataManager.instance.data.currentArea.name).bossKey) {
 					return false;
 				}
 				return true;
