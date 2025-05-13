@@ -1,10 +1,9 @@
 import { ASSET_KEYS, SPIDER_ANIMATION_KEYS } from "../../common/assets";
 import { DIRECTION } from "../../common/common";
-import { ENEMY_SPIDER_CHANGE_DIRECTION_DELAY_MAX, ENEMY_SPIDER_CHANGE_DIRECTION_DELAY_MIN, ENEMY_SPIDER_CHANGE_DIRECTION_DELAY_WAIT, ENEMY_SPIDER_HURT_PUSHBACK_SPEED, ENEMY_SPIDER_SPEED, ENEMY_SPIDER_START_MAX_LIFE } from "../../common/config";
+import { ENEMY_SPIDER_CHANGE_DIRECTION_DELAY_MAX, ENEMY_SPIDER_CHANGE_DIRECTION_DELAY_MIN, ENEMY_SPIDER_CHANGE_DIRECTION_DELAY_WAIT, ENEMY_SPIDER_HURT_PUSHBACK_SPEED, ENEMY_SPIDER_SPEED, ENEMY_SPIDER_START_MAX_HEALTH } from "../../common/config";
 import { Direction, Position } from "../../common/types";
 import { exhaustiveGuard } from "../../common/utils";
 import { AnimationConfig } from "../../components/game-object/animation-component";
-import { DirectionComponent } from "../../components/game-object/direction-component";
 import { InputComponent } from "../../components/input/input-component";
 import { CHARACTER_STATES } from "../../components/state-macine/states/character/character-states";
 import { DeathState } from "../../components/state-macine/states/character/death-state";
@@ -54,7 +53,7 @@ export class Spider extends CharacterGameObject {
 			speed: ENEMY_SPIDER_SPEED,
 			inputComponent: new InputComponent(),
 			isInvulnerable: false,
-			maxLife: ENEMY_SPIDER_START_MAX_LIFE,
+			maxLife: ENEMY_SPIDER_START_MAX_HEALTH,
 		});
 
 		this._directionComponent.callback = (direction: Direction) => {

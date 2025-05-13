@@ -1,5 +1,4 @@
 import { CUSTOM_EVENTS, EVENT_BUS } from "../../../../common/event-bus";
-import { isArcadePhysicsBody } from "../../../../common/utils";
 import { CharacterGameObject } from "../../../../game-objects/common/character-game-object";
 import { Chest } from "../../../../game-objects/objects/chest";
 import { BaseCharacterState } from "./base-character-state";
@@ -15,9 +14,14 @@ export class OpenChestState extends BaseCharacterState {
 
 		this._resetObjectVelocity();
 
+		// Play animation and then show ui for getting new item
 		this._gameObject.animationComponent.playAnimation(`LIFT_${this._gameObject.direction}`, () => {
 			EVENT_BUS.emit(CUSTOM_EVENTS.OPENED_CHEST, chest);
-			this._stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
+
+			// After showing message to player, transition to idle state
+			EVENT_BUS.once(CUSTOM_EVENTS.DIALOG_CLOSED, () => {
+				this._stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
+			});
 		});
 	}
 }
