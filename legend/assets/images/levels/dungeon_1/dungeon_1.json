@@ -25,7 +25,7 @@
                  "width":16,
                  "x":0,
                  "y":0
-                }, 
+                },
                 {
                  "data":[147, 148, 149, 146, 146, 146, 148, 149, 147, 149, 147, 148, 148, 147, 148, 146,
                     149, 147, 146, 149, 148, 146, 147, 147, 146, 149, 146, 147, 148, 147, 147, 147,
@@ -47,7 +47,7 @@
                  "width":16,
                  "x":0,
                  "y":16
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     147, 149, 148, 147, 146, 146, 147, 146, 147, 148, 146, 148, 146, 148, 146, 146,
@@ -69,7 +69,7 @@
                  "width":16,
                  "x":48,
                  "y":16
-                }, 
+                },
                 {
                  "data":[149, 149, 148, 147, 146, 146, 147, 146, 147, 148, 146, 148, 146, 148, 146, 146,
                     148, 148, 148, 146, 146, 148, 146, 149, 149, 148, 147, 147, 146, 147, 149, 149,
@@ -91,7 +91,7 @@
                  "width":16,
                  "x":0,
                  "y":32
-                }, 
+                },
                 {
                  "data":[149, 149, 148, 147, 146, 146, 147, 146, 147, 148, 146, 148, 146, 148, 146, 146,
                     148, 148, 148, 146, 146, 148, 146, 149, 149, 148, 147, 147, 146, 147, 149, 148,
@@ -113,7 +113,7 @@
                  "width":16,
                  "x":16,
                  "y":32
-                }, 
+                },
                 {
                  "data":[149, 149, 148, 147, 146, 146, 147, 146, 147, 148, 146, 148, 146, 148, 146, 146,
                     148, 148, 148, 146, 146, 148, 146, 149, 149, 148, 147, 147, 146, 147, 149, 148,
@@ -135,7 +135,7 @@
                  "width":16,
                  "x":32,
                  "y":32
-                }, 
+                },
                 {
                  "data":[146, 276, 66, 251, 252, 251, 352, 251, 252, 352, 252, 142, 145, 68, 281, 146,
                     146, 276, 66, 251, 142, 251, 252, 251, 252, 251, 252, 251, 141, 68, 281, 146,
@@ -169,7 +169,7 @@
          "width":64,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "chunks":[
                 {
@@ -193,7 +193,7 @@
                  "width":16,
                  "x":0,
                  "y":0
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 147, 753, 754, 147, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 146, 753, 781, 146, 0, 0, 0, 0, 0, 0,
@@ -215,7 +215,7 @@
                  "width":16,
                  "x":0,
                  "y":16
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 147, 780, 754, 147, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 146, 754, 754, 146, 0, 0, 0, 0, 0, 0,
@@ -237,7 +237,7 @@
                  "width":16,
                  "x":0,
                  "y":32
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -259,7 +259,7 @@
                  "width":16,
                  "x":16,
                  "y":32
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -281,7 +281,7 @@
                  "width":16,
                  "x":32,
                  "y":32
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -315,7 +315,7 @@
          "width":64,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "chunks":[
                 {
@@ -339,7 +339,7 @@
                  "width":16,
                  "x":0,
                  "y":0
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 1432, 0, 0, 1432, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 1432, 0, 0, 1432, 0, 0, 0, 0, 0, 0,
@@ -361,7 +361,7 @@
                  "width":16,
                  "x":0,
                  "y":16
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -383,7 +383,7 @@
                  "width":16,
                  "x":48,
                  "y":16
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 1432, 0, 0, 1432, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 1432, 0, 0, 1432, 0, 0, 0, 0, 0, 0,
@@ -405,7 +405,7 @@
                  "width":16,
                  "x":0,
                  "y":32
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -427,7 +427,7 @@
                  "width":16,
                  "x":16,
                  "y":32
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -449,7 +449,7 @@
                  "width":16,
                  "x":32,
                  "y":32
-                }, 
+                },
                 {
                  "data":[0, 0, 1432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1432, 0, 0,
                     0, 0, 1432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1432, 0, 0,
@@ -483,7 +483,7 @@
          "width":64,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "chunks":[
                 {
@@ -507,7 +507,7 @@
                  "width":16,
                  "x":0,
                  "y":0
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -529,7 +529,7 @@
                  "width":16,
                  "x":0,
                  "y":16
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -551,7 +551,7 @@
                  "width":16,
                  "x":48,
                  "y":16
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -573,7 +573,7 @@
                  "width":16,
                  "x":0,
                  "y":32
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -595,7 +595,7 @@
                  "width":16,
                  "x":16,
                  "y":32
-                }, 
+                },
                 {
                  "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -617,7 +617,7 @@
                  "width":16,
                  "x":32,
                  "y":32
-                }, 
+                },
                 {
                  "data":[0, 0, 1432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1432, 0, 0,
                     0, 0, 1432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1432, 0, 0,
@@ -651,7 +651,7 @@
          "width":64,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "id":2,
          "image":"..\/assets\/D02EastPalace.png",
@@ -662,7 +662,7 @@
          "visible":false,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "id":18,
          "layers":[
@@ -691,7 +691,7 @@
                                  "width":16,
                                  "x":832,
                                  "y":704
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -709,7 +709,7 @@
                                  "width":16,
                                  "x":944,
                                  "y":704
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -727,7 +727,7 @@
                                  "width":16,
                                  "x":832,
                                  "y":368
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -745,7 +745,7 @@
                                  "width":16,
                                  "x":944,
                                  "y":368
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -763,7 +763,7 @@
                                  "width":16,
                                  "x":880,
                                  "y":432
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -787,7 +787,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":42,
@@ -804,17 +804,17 @@
                                          "propertytype":"chestRewards",
                                          "type":"string",
                                          "value":"NOTHING"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"requiresBossKey",
                                          "type":"bool",
                                          "value":true
-                                        }, 
+                                        },
                                         {
                                          "name":"revealChestTrigger",
                                          "propertytype":"trapTrigger",
@@ -827,7 +827,7 @@
                                  "width":32,
                                  "x":880,
                                  "y":512
-                                }, 
+                                },
                                 {
                                  "gid":244,
                                  "height":16,
@@ -839,17 +839,17 @@
                                          "propertytype":"chestRewards",
                                          "type":"string",
                                          "value":"BOSS_KEY"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"requiresBossKey",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"revealChestTrigger",
                                          "propertytype":"trapTrigger",
@@ -868,7 +868,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":27,
@@ -885,7 +885,7 @@
                                  "width":16,
                                  "x":864,
                                  "y":496
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -897,7 +897,7 @@
                                  "width":16,
                                  "x":864,
                                  "y":528
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -909,7 +909,7 @@
                                  "width":16,
                                  "x":912,
                                  "y":496
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -927,7 +927,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":26,
@@ -944,12 +944,12 @@
                                          "propertytype":"switchAction",
                                          "type":"string",
                                          "value":"OPEN_DOOR"
-                                        }, 
+                                        },
                                         {
                                          "name":"targetIds",
                                          "type":"string",
                                          "value":"1"
-                                        }, 
+                                        },
                                         {
                                          "name":"texture",
                                          "propertytype":"switchTexture",
@@ -968,7 +968,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":25,
@@ -985,38 +985,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"LEFT"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"TRAP"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":5
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -1042,7 +1042,7 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                }, 
+                },
                 {
                  "id":22,
                  "layers":[
@@ -1062,17 +1062,17 @@
                                          "propertytype":"chestRewards",
                                          "type":"string",
                                          "value":"MAP"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"requiresBossKey",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"revealChestTrigger",
                                          "propertytype":"trapTrigger",
@@ -1085,7 +1085,7 @@
                                  "width":16,
                                  "x":704,
                                  "y":592
-                                }, 
+                                },
                                 {
                                  "gid":244,
                                  "height":16,
@@ -1097,17 +1097,17 @@
                                          "propertytype":"chestRewards",
                                          "type":"string",
                                          "value":"COMPASS"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"requiresBossKey",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"revealChestTrigger",
                                          "propertytype":"trapTrigger",
@@ -1126,7 +1126,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":39,
@@ -1143,7 +1143,7 @@
                                  "width":16,
                                  "x":624,
                                  "y":592
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -1161,7 +1161,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":38,
@@ -1178,12 +1178,12 @@
                                          "propertytype":"switchAction",
                                          "type":"string",
                                          "value":"OPEN_DOOR"
-                                        }, 
+                                        },
                                         {
                                          "name":"targetIds",
                                          "type":"string",
                                          "value":"1,2"
-                                        }, 
+                                        },
                                         {
                                          "name":"texture",
                                          "propertytype":"switchTexture",
@@ -1196,7 +1196,7 @@
                                  "width":16,
                                  "x":576,
                                  "y":656
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -1208,12 +1208,12 @@
                                          "propertytype":"switchAction",
                                          "type":"string",
                                          "value":"REVEAL_CHEST"
-                                        }, 
+                                        },
                                         {
                                          "name":"targetIds",
                                          "type":"string",
                                          "value":"1"
-                                        }, 
+                                        },
                                         {
                                          "name":"texture",
                                          "propertytype":"switchTexture",
@@ -1232,7 +1232,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":37,
@@ -1249,38 +1249,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"LEFT"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"TRAP"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":4
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -1293,7 +1293,7 @@
                                  "width":8,
                                  "x":536,
                                  "y":672
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":32,
@@ -1305,38 +1305,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"RIGHT"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"TRAP"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":6
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -1362,7 +1362,7 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                }, 
+                },
                 {
                  "id":23,
                  "layers":[
@@ -1382,17 +1382,17 @@
                                          "propertytype":"chestRewards",
                                          "type":"string",
                                          "value":"SMALL_KEY"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"requiresBossKey",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"revealChestTrigger",
                                          "propertytype":"trapTrigger",
@@ -1411,7 +1411,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":35,
@@ -1428,12 +1428,12 @@
                                          "propertytype":"switchAction",
                                          "type":"string",
                                          "value":"NOTHING"
-                                        }, 
+                                        },
                                         {
                                          "name":"targetIds",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"texture",
                                          "propertytype":"switchTexture",
@@ -1446,7 +1446,7 @@
                                  "width":16,
                                  "x":336,
                                  "y":608
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -1458,12 +1458,12 @@
                                          "propertytype":"switchAction",
                                          "type":"string",
                                          "value":"REVEAL_CHEST"
-                                        }, 
+                                        },
                                         {
                                          "name":"targetIds",
                                          "type":"string",
                                          "value":"1"
-                                        }, 
+                                        },
                                         {
                                          "name":"texture",
                                          "propertytype":"switchTexture",
@@ -1476,7 +1476,7 @@
                                  "width":16,
                                  "x":416,
                                  "y":608
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -1488,12 +1488,12 @@
                                          "propertytype":"switchAction",
                                          "type":"string",
                                          "value":"NOTHING"
-                                        }, 
+                                        },
                                         {
                                          "name":"targetIds",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"texture",
                                          "propertytype":"switchTexture",
@@ -1506,7 +1506,7 @@
                                  "width":16,
                                  "x":336,
                                  "y":704
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -1518,12 +1518,12 @@
                                          "propertytype":"switchAction",
                                          "type":"string",
                                          "value":"OPEN_DOOR"
-                                        }, 
+                                        },
                                         {
                                          "name":"targetIds",
                                          "type":"string",
                                          "value":"1"
-                                        }, 
+                                        },
                                         {
                                          "name":"texture",
                                          "propertytype":"switchTexture",
@@ -1542,7 +1542,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":34,
@@ -1559,38 +1559,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"LEFT"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"TRAP"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":3
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -1603,7 +1603,7 @@
                                  "width":8,
                                  "x":280,
                                  "y":672
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":32,
@@ -1615,38 +1615,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"RIGHT"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"LOCK"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":5
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -1665,7 +1665,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":44,
@@ -1688,7 +1688,7 @@
                                  "width":16,
                                  "x":368,
                                  "y":704
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -1719,7 +1719,7 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                }, 
+                },
                 {
                  "id":21,
                  "layers":[
@@ -1739,7 +1739,7 @@
                                  "width":16,
                                  "x":128,
                                  "y":656
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -1757,7 +1757,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":31,
@@ -1774,38 +1774,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"UP"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"BOSS"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -1818,7 +1818,7 @@
                                  "width":32,
                                  "x":112,
                                  "y":560
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":32,
@@ -1830,38 +1830,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"RIGHT"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"OPEN"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":4
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -1874,7 +1874,7 @@
                                  "width":8,
                                  "x":224,
                                  "y":672
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":8,
@@ -1886,38 +1886,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"DOWN"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"OPEN_ENTRANCE"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":3
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":"WORLD"
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -1943,7 +1943,7 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                }, 
+                },
                 {
                  "id":20,
                  "layers":[
@@ -1969,7 +1969,7 @@
                                  "width":16,
                                  "x":112,
                                  "y":352
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -1987,7 +1987,7 @@
                                  "width":16,
                                  "x":160,
                                  "y":432
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -2011,7 +2011,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":30,
@@ -2028,7 +2028,7 @@
                                  "width":16,
                                  "x":48,
                                  "y":416
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -2040,7 +2040,7 @@
                                  "width":16,
                                  "x":48,
                                  "y":464
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -2052,7 +2052,7 @@
                                  "width":16,
                                  "x":192,
                                  "y":464
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":16,
@@ -2070,7 +2070,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":28,
@@ -2087,38 +2087,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"UP"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"TRAP"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -2131,7 +2131,7 @@
                                  "width":32,
                                  "x":112,
                                  "y":304
-                                }, 
+                                },
                                 {
                                  "gid":1432,
                                  "height":8,
@@ -2143,38 +2143,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"DOWN"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"TRAP"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":3
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -2200,7 +2200,7 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                }, 
+                },
                 {
                  "id":19,
                  "layers":[
@@ -2232,7 +2232,7 @@
                          "visible":true,
                          "x":0,
                          "y":0
-                        }, 
+                        },
                         {
                          "draworder":"topdown",
                          "id":7,
@@ -2249,38 +2249,38 @@
                                          "propertytype":"direction",
                                          "type":"string",
                                          "value":"DOWN"
-                                        }, 
+                                        },
                                         {
                                          "name":"doorType",
                                          "propertytype":"doorType",
                                          "type":"string",
                                          "value":"TRAP"
-                                        }, 
+                                        },
                                         {
                                          "name":"id",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"isLevelTransition",
                                          "type":"bool",
                                          "value":false
-                                        }, 
+                                        },
                                         {
                                          "name":"targetDoorId",
                                          "type":"int",
                                          "value":1
-                                        }, 
+                                        },
                                         {
                                          "name":"targetLevel",
                                          "type":"string",
                                          "value":""
-                                        }, 
+                                        },
                                         {
                                          "name":"targetRoomId",
                                          "type":"int",
                                          "value":2
-                                        }, 
+                                        },
                                         {
                                          "name":"trapDoorTrigger",
                                          "propertytype":"trapTrigger",
@@ -2313,7 +2313,7 @@
          "visible":true,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "draworder":"topdown",
          "id":47,
@@ -2337,7 +2337,7 @@
                  "width":256,
                  "x":0,
                  "y":240
-                }, 
+                },
                 {
                  "gid":1432,
                  "height":224,
@@ -2355,7 +2355,7 @@
                  "width":256,
                  "x":0,
                  "y":496
-                }, 
+                },
                 {
                  "gid":1432,
                  "height":224,
@@ -2373,7 +2373,7 @@
                  "width":256,
                  "x":0,
                  "y":752
-                }, 
+                },
                 {
                  "gid":1432,
                  "height":224,
@@ -2391,7 +2391,7 @@
                  "width":256,
                  "x":256,
                  "y":752
-                }, 
+                },
                 {
                  "gid":1432,
                  "height":224,
@@ -2409,7 +2409,7 @@
                  "width":256,
                  "x":512,
                  "y":752
-                }, 
+                },
                 {
                  "gid":1432,
                  "height":464,
@@ -2453,7 +2453,7 @@
          "tilecount":1431,
          "tileheight":16,
          "tilewidth":16
-        }, 
+        },
         {
          "columns":1,
          "firstgid":1432,
