@@ -222,15 +222,14 @@ class WorldMap extends Phaser.GameObjects.Sprite
 
     this.taken = false;
 
-    this.setOrigin(0);
-    this.setDisplaySize(size, size);
+    this.setDisplaySize(size * 0.8, size * 0.6);
 
     world.scene.add.existing(this);
   }
 
   set_pos(x, y) {
     this.coord = { x: x, y: y };
-    this.setPosition(x * this.size, y * this.size);
+    this.setPosition((x + 0.5) * this.size, (y + 0.5) * this.size);
   }
 
   set_random() {
@@ -459,6 +458,7 @@ class Game extends Phaser.Scene
     this.load.setPath('assets/img/');
     this.load.image('guy', 'guy.png');
     this.load.image('key', 'key.png');
+    this.load.image('map', 'map.png');
     this.load.spritesheet('walls', 'walls.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('door', 'door.png', { frameWidth: 32, frameHeight: 32 });
   }
@@ -473,6 +473,7 @@ class Game extends Phaser.Scene
 
     this.input.keyboard.on('keydown-C', function(event) { this.clear(); }, this);
     this.input.keyboard.on('keydown-R', function(event) { this.randomize(); }, this);
+    this.input.keyboard.on('keydown-M', function(event) { this.world.show_all(); }, this);
 
     // Initialize cells
     this.world = new World(this, world_min_x, world_min_y, world_max_width, world_max_height);
