@@ -116,6 +116,13 @@ class Guy extends Phaser.GameObjects.Sprite
     this.size = size;
     this.coord = { x: x, y: y };
 
+    // Sounds
+    this.sounds = {
+      meow: world.scene.sound.add('meow'),
+    };
+
+    this.meow = false;
+
     this.setDisplaySize(size * 0.7, size * 0.7);
     this.setDepth(1);
     //this.setInteractive();
@@ -126,9 +133,16 @@ class Guy extends Phaser.GameObjects.Sprite
     world.scene.add.existing(this);
   }
 
+  toggle_meow() {
+    this.meow = !this.meow;
+  }
+
   set_pos(x, y) {
     this.coord = { x: x, y: y };
     this.setPosition((x + 0.5) * this.size, (y + 0.5) * this.size);
+    if (this.meow) {
+      this.sounds.meow.play();
+    }
   }
 
   set_random() {
@@ -420,6 +434,10 @@ class World extends Phaser.GameObjects.Container
       this.guy_visit(p.x + 1, p.y);
   }
 
+  toggle_meow() {
+    this.guy.toggle_meow();
+  }
+
   update() {
     this.cells[this.guy.coord.y][this.guy.coord.x].tint = 0xcccccc;
 
@@ -461,6 +479,9 @@ class Game extends Phaser.Scene
     this.load.image('map', 'map.png');
     this.load.spritesheet('walls', 'walls.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('door', 'door.png', { frameWidth: 32, frameHeight: 32 });
+
+    this.load.setPath('assets/audio/');
+    this.load.audio('meow', 'meow.mp3');
   }
 
   create () {
@@ -471,7 +492,8 @@ class Game extends Phaser.Scene
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    this.input.keyboard.on('keydown-C', function(event) { this.clear(); }, this);
+    this.input.keyboard.on('keydown-C', function (event) { this.world.toggle_meow(); }, this);
+//    this.input.keyboard.on('keydown-C', function (event) { this.clear(); }, this);
     this.input.keyboard.on('keydown-R', function(event) { this.randomize(); }, this);
     this.input.keyboard.on('keydown-M', function(event) { this.world.show_all(); }, this);
 
