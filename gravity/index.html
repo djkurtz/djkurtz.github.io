@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Gravity</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+
+    html,
+    body {
+      margin: 0; /* remove default margin */
+      height: 100%; /* make body fill the browser window */
+    }
+
+    #container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #container canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #statsCanvas {
+      z-index: 10;  /* Ensure it stays on top */
+      pointer-events: none; /* Allows mouse clicks to "pass through" to the WebGPU scene */
+      background: transparent;
+    }
+  </style>
+  <script defer src="main.js" type="module"></script>
+</head>
+
+<body>
+  <div id="container">
+    <canvas id="gpuCanvas"></canvas>
+    <canvas id="statsCanvas"></canvas>
+  </div>
+</body>
+
+</html>
