@@ -57,6 +57,7 @@ class Cell extends Phaser.GameObjects.Sprite
 
     this.visible = false;
     this.visited = false;
+    this.seen = false;
 
     this.setOrigin(0);
     this.setDisplaySize(size, size);
@@ -66,6 +67,14 @@ class Cell extends Phaser.GameObjects.Sprite
     //this.on('pointerdown', function () { this.toggle_state(); });
 
     world.scene.add.existing(this);
+  }
+
+  reset() {
+    this.set_state(states[0]);
+    this.visited = false;
+    this.seen = false;
+    this.tint = 0xffffff;
+    this.setVisible(false);
   }
 
   update() {
@@ -104,6 +113,11 @@ class Cell extends Phaser.GameObjects.Sprite
   }
   open_s() {
     this.set_state(to_state(this.state.n, this.state.w, this.state.e, true));
+  }
+
+  do_see() {
+    this.seen = true;
+    this.setVisible(true);
   }
 }
 
@@ -292,6 +306,7 @@ class World extends Phaser.GameObjects.Container
 
     this.pause = true;
     this.level = 1;
+    this.show_unvisited = false;
 
     // Initialize cells
     this.cells = new Array(this.Ny);
@@ -324,8 +339,10 @@ class World extends Phaser.GameObjects.Container
   clear() {
     this.pause = true;
     this.cells.forEach(row => row.forEach(cell => {
+      cell.reset();
         cell.set_state(states[0]);
         cell.visited = false;
+        cell.seen = false;
         cell.tint = 0xffffff;
     }));
   }
@@ -393,21 +410,41 @@ class World extends Phaser.GameObjects.Container
     }
   }
 
+  hide_unvisited() {
+    for (let y = 0; y < this.Ny; y++) {
+      for (let x = 0; x < this.Nx; x++) {
+        if (!this.cells[y][x].seen) {
+          this.cells[y][x].setVisible(false);
+        }
+      }
+    }
+  }
+
+  toggle_show_all() {
+    this.show_unvisited = !this.show_unvisited;
+    if (this.show_unvisited) {
+      this.show_all();
+    } else {
+      this.hide_unvisited();
+    }
+  }
+
   guy_visit(x, y) {
-    this.cells[y][x].setVisible(true);
+    this.cells[y][x].do_see();
     this.guy.set_pos(x, y);
 
-    if (this.cells[y][x].north())
-      this.cells[y - 1][x].setVisible(true);
+    if (this.cells[y][x].north()) {
+      this.cells[y - 1][x].do_see();
+    }
 
     if (this.cells[y][x].south())
-      this.cells[y + 1][x].setVisible(true);
+      this.cells[y + 1][x].do_see();
 
     if (this.cells[y][x].east())
-      this.cells[y][x + 1].setVisible(true);
+      this.cells[y][x + 1].do_see();
 
     if (this.cells[y][x].west())
-      this.cells[y][x - 1].setVisible(true);
+      this.cells[y][x - 1].do_see();
   }
 
   guy_north() {
@@ -459,7 +496,6 @@ class World extends Phaser.GameObjects.Container
               this.pause = false;
           });
       }, this);
-
     }
   }
 }
@@ -495,7 +531,7 @@ class Game extends Phaser.Scene
     this.input.keyboard.on('keydown-C', function (event) { this.world.toggle_meow(); }, this);
 //    this.input.keyboard.on('keydown-C', function (event) { this.clear(); }, this);
     this.input.keyboard.on('keydown-R', function(event) { this.randomize(); }, this);
-    this.input.keyboard.on('keydown-M', function(event) { this.world.show_all(); }, this);
+    this.input.keyboard.on('keydown-M', function(event) { this.world.toggle_show_all(); }, this);
 
     // Initialize cells
     this.world = new World(this, world_min_x, world_min_y, world_max_width, world_max_height);
