@@ -116,8 +116,7 @@ class Guy extends Phaser.GameObjects.Sprite
     this.size = size;
     this.coord = { x: x, y: y };
 
-    this.setOrigin(0);
-    this.setDisplaySize(size, size);
+    this.setDisplaySize(size * 0.7, size * 0.7);
     this.setDepth(1);
     //this.setInteractive();
     //this.on('pointerdown', function () { this.toggle_state(); });
@@ -129,7 +128,7 @@ class Guy extends Phaser.GameObjects.Sprite
 
   set_pos(x, y) {
     this.coord = { x: x, y: y };
-    this.setPosition(x * this.size, y * this.size);
+    this.setPosition((x + 0.5) * this.size, (y + 0.5) * this.size);
   }
 
   set_random() {
